@@ -6,9 +6,14 @@ scram b -j4
 
 # Tests
 cd HTT-utilities/Jet2TauFakes/test   
+
+## C++
 root   
  .x loadLibrary.C   
  .L test2.C   
  test2()   
+
+## Python
+python test.py  
 
 

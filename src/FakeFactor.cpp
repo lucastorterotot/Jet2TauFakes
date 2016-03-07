@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-ClassImp(FakeFactor)
+//ClassImp(FakeFactor)
 
 /*****************************************************************/
 FakeFactor::~FakeFactor()

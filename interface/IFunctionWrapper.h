@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-#include "Rtypes.h"
+//#include "Rtypes.h"
 
 
 class IFunctionWrapper
@@ -17,13 +17,14 @@ class IFunctionWrapper
         virtual ~IFunctionWrapper();
 
         const std::string& name() {return m_name;} 
+        virtual double value(size_t, const double*) {return 0.;}
         virtual double value(const std::vector<double>&) {return 0.;}
 
     private:
         std::string m_name;
 
-    private:
-        ClassDef(IFunctionWrapper, 1); 
+    //private:
+        //ClassDef(IFunctionWrapper, 1); 
 };
 
 

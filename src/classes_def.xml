@@ -1,0 +1,10 @@
+<lcgdict>
+
+ <class name="IFunctionWrapper"/>
+ <class name="WrapperTGraph"/>
+ <class name="WrapperTFormula"/>
+ <class name="WrapperTH2F"/>
+ <class name="FakeFactor"/>
+
+ 
+</lcgdict>

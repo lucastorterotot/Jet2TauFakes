@@ -1,7 +1,7 @@
 
 #include "HTT-utilities/Jet2TauFakes/interface/WrapperTGraph.h"
 
-ClassImp(WrapperTGraph)
+//ClassImp(WrapperTGraph)
 
 /*****************************************************************/
 WrapperTGraph::~WrapperTGraph()
