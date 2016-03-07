@@ -14,17 +14,21 @@ class WrapperTGraph : public IFunctionWrapper
         WrapperTGraph(const TGraph& g, const std::string& name):IFunctionWrapper(name),m_graph(g) {};
         virtual ~WrapperTGraph();
 
+        double value(size_t size, const double* xs) override
+        {
+            return (size>0 ? m_graph.Eval(xs[0]) : 0.);
+        }
         double value(const std::vector<double>& xs) override
         {
-            return (xs.size()>0 ? m_graph.Eval(xs[0]) : 0.);
+            return value(xs.size(), xs.data());
         }
 
     private:
         TGraph m_graph;
 
 
-    private:
-        ClassDef(WrapperTGraph,1)
+    //private:
+        //ClassDef(WrapperTGraph,1)
 };
 
 

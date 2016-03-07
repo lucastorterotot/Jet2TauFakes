@@ -14,21 +14,25 @@ class WrapperTH2F : public IFunctionWrapper
         WrapperTH2F(const TH2F& h, const std::string& name):IFunctionWrapper(name),m_histo(h) {};
         virtual ~WrapperTH2F();
 
-        double value(const std::vector<double>& xs) override
+        double value(size_t size, const double* xs) override
         {
-            if(xs.size()<2) return 0.;
+            if(size<2) return 0.;
             // FIXME: don't use overflow bins
             int bx = m_histo.GetXaxis()->FindBin(xs[0]);
             int by = m_histo.GetYaxis()->FindBin(xs[1]);
             return m_histo.GetBinContent(bx,by);
+        }
+        double value(const std::vector<double>& xs) override
+        {
+            return value(xs.size(), xs.data());
         }
 
     private:
         TH2F m_histo;
 
 
-    private:
-        ClassDef(WrapperTH2F,1)
+    //private:
+        //ClassDef(WrapperTH2F,1)
 };
 
 
