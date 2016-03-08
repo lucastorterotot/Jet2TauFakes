@@ -3,7 +3,9 @@ import ROOT
 from array import array
 
 
-ff = FakeFactor(['tau_pt', 'tau_decay', 'mt'])
+print '########################################'
+print 'Test 1'
+ff = FakeFactor(vars=['tau_pt', 'tau_decay', 'mt'])
 
 leaf1 = Leaf(
     name='ff_W',
@@ -25,3 +27,28 @@ node = Node(
 
 fill(ff, node)
 print ff.value([30,1,10])
+
+
+print '########################################'
+print 'Test 2'
+ff2 = FakeFactor(vars=['tau_pt', 'tau_decay', 'mt'])
+root = Node(
+    name='ff_W_corr',
+    formula='{corr_mt}*{ff_W}',
+    leaves=[
+        Leaf(
+            name='ff_W',
+            file='/afs/cern.ch/user/j/jsauvan/workspace/Projects/Htautau_Run2/Studies/FakeRate/ComputeFakeRates/plots/FakeFactors_Data_HighMT_2D/FakeFactors_Data_HighMT_2D.root',
+            object='FakeFactors_Data_HighMT_2D_Iso_Medium_InvertIso_Medium_tau_pt_vs_decayMode',
+            vars=['tau_pt','tau_decay']
+        ),
+        Leaf(
+            name='corr_mt',
+            file='/afs/cern.ch/user/j/jsauvan/workspace/Projects/Htautau_Run2/Studies/FakeRate/ComputeMTCorrection/results/mtCorrections.root',
+            object='mt_correction',
+            vars=['mt']
+        )
+    ]
+)
+fill(ff2, root)
+print ff2.value([30,1,10])
