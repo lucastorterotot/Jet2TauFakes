@@ -1,5 +1,6 @@
 import ROOT
 import copy
+from array import array
 
 class Node:
     def __init__(self, name='', formula='', leaves=[]):
@@ -20,6 +21,9 @@ class Node:
         wtformula = ROOT.WrapperTFormula(tformula, self.name)
         return wtformula
 
+    def __eq__(self,other):
+        return  self.name==other.name
+
 
 class Leaf:
     def __init__(self, name='', file='', object='', vars=[]):
@@ -27,6 +31,7 @@ class Leaf:
         self.file = file
         self.object = object
         self.vars = vars
+        self.index = 0
 
     def create(self):
         file = ROOT.TFile.Open(self.file)
@@ -37,7 +42,6 @@ class Leaf:
             raise StandardError('Cannot load object '+self.object+' for leaf '+self.name)
         ## create wrapper according to object type
         wobject = None
-        ROOT.gDirectory = ROOT.gROOT
         if isinstance(object, ROOT.TGraph):
             wobject = ROOT.WrapperTGraph(object, self.name)
         elif isinstance(object, ROOT.TH2F):
@@ -46,3 +50,39 @@ class Leaf:
             raise StandardError('Undefined wrapper for object of class '+str(object.__class__))
         file.Close()
         return wobject
+
+    def __eq__(self,other):
+        return  self.name==other.name
+
+class FakeFactor:
+    def __init__(self, vars):
+        self.fakefactor = ROOT.FakeFactor()
+        self.vars = vars
+        self.wrapperlist = []
+        self.nodelist = []
+
+    def addNode(self, node):
+        wrapper = node.create()
+        leaves = [self.nodelist.index(l) for l in node.leaves] if isinstance(node, Node) else []
+        vars = [self.vars.index(v) for v in node.vars] if isinstance(node, Leaf) else []
+        self.fakefactor.addNode(wrapper,
+                                len(leaves), array('L', leaves if len(leaves)>0 else [0]),
+                                len(vars), array('L', vars if len(vars)>0 else [0])
+                               )
+        self.wrapperlist.append(wrapper)
+        self.nodelist.append(node)
+
+    def value(self, inputs):
+        return self.fakefactor.value(len(inputs), array('d', inputs))
+
+
+
+def fill(fakefactor, node):
+    if isinstance(node, Node):
+        for leaf in node.leaves:
+            fill(fakefactor, leaf)
+        fakefactor.addNode(node)
+    elif isinstance(node, Leaf):
+        fakefactor.addNode(node)
+    else:
+        raise StandardError('Incompatible fake factor node/leaf type '+str(node.__class__))
