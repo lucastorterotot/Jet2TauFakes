@@ -2,7 +2,7 @@
 #ifndef Jet2TauFakes_FakeFactor_h
 #define Jet2TauFakes_FakeFactor_h
 
-#include "HTT-utilities/Jet2TauFakes/interface/IFunctionWrapper.h"
+#include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
 
 #include <memory>
 #include <vector>
