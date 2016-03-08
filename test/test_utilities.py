@@ -38,13 +38,13 @@ root = Node(
     leaves=[
         Leaf(
             name='ff_W',
-            file='/afs/cern.ch/user/j/jsauvan/workspace/Projects/Htautau_Run2/Studies/FakeRate/ComputeFakeRates/plots/FakeFactors_Data_HighMT_2D/FakeFactors_Data_HighMT_2D.root',
+            file='/afs/cern.ch/work/j/jsauvan/public/HTauTau/FakeFactors/FakeFactors_Data_HighMT_2D.root',
             object='FakeFactors_Data_HighMT_2D_Iso_Medium_InvertIso_Medium_tau_pt_vs_decayMode',
             vars=['tau_pt','tau_decay']
         ),
         Leaf(
             name='corr_mt',
-            file='/afs/cern.ch/user/j/jsauvan/workspace/Projects/Htautau_Run2/Studies/FakeRate/ComputeMTCorrection/results/mtCorrections.root',
+            file='/afs/cern.ch/work/j/jsauvan/public/HTauTau/FakeFactors/mtCorrections.root',
             object='mt_correction',
             vars=['mt']
         )
