@@ -2,7 +2,7 @@
 #ifndef Jet2TauFakes_WrapperTH2F_h
 #define Jet2TauFakes_WrapperTH2F_h
 
-#include "HTT-utilities/Jet2TauFakes/interface/IFunctionWrapper.h"
+#include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
 
 #include "TH2F.h"
 

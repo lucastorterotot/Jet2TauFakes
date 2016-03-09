@@ -1,5 +1,5 @@
 
-#include "HTT-utilities/Jet2TauFakes/interface/IFunctionWrapper.h"
+#include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
 
 //ClassImp(IFunctionWrapper)
 

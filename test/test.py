@@ -3,10 +3,10 @@ import os
 from array import array
 
 
-cmsswBase = os.environ["CMSSW_BASE"]
-scram_arch = os.environ["SCRAM_ARCH"]
-ROOT.gSystem.AddDynamicPath("{0}/lib/{1}/".format(cmsswBase, scram_arch))
-ROOT.gSystem.Load("libHTT-utilitiesJet2TauFakes.so") 
+#cmsswBase = os.environ["CMSSW_BASE"]
+#scram_arch = os.environ["SCRAM_ARCH"]
+#ROOT.gSystem.AddDynamicPath("{0}/lib/{1}/".format(cmsswBase, scram_arch))
+#ROOT.gSystem.Load("libHTTutilitiesJet2TauFakes.so") 
 
 
 
