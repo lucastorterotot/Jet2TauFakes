@@ -112,6 +112,30 @@ bool FakeFactor::replaceNode(const std::string& node,
             return false;
         }
     }
-    /// TODO: implementation
+    // Search node to be replaced
+    size_t nodeIndex = 0;
+    bool found = false;
+    for(size_t i=0; i<sys_nodes->second.size(); i++)
+    {
+        size_t index = sys_nodes->second[i];
+        if(m_wrappers[index]->name()==node)
+        {
+            nodeIndex = i;
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+    {
+        std::cout<<"[FakeFactor] ERROR: Trying to replace a non-existing node\n";
+        return false;
+    }
+    auto sys_indices = m_indices.find(sys);
+    auto sys_inputs = m_nodeInputs.find(sys);
+    // replace node
+    m_wrappers.push_back(fct);
+    sys_nodes->second[nodeIndex] = m_wrappers.size()-1;
+    sys_indices->second[nodeIndex] = sons;
+    sys_inputs->second[nodeIndex] = vars;
     return true;
 }
