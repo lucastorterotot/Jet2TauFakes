@@ -61,28 +61,14 @@ class FakeFactor
                 const std::vector<size_t>&,
                 const std::vector<size_t>&,
                 const std::string& sys="");
-        bool replaceNode(const std::string& name,
-                WrapperPtr fct,
-                size_t sonsSize, const size_t* sons,
-                size_t varsSize, const size_t* vars,
-                const std::string& sys="")
-        {
-            std::vector<size_t> vsons(sons, sons+sonsSize);
-            std::vector<size_t> vvars(vars, vars+varsSize);
-            return replaceNode(name, fct, vsons, vvars, sys);
-        }
-        bool replaceNode(const std::string&,
-                WrapperPtr,
-                const std::vector<size_t>&,
-                const std::vector<size_t>&,
-                const std::string& sys="");
 
         void registerSystematic(const std::string& name)
         {
-            // initialize with nominal objects
-            m_nodes.insert( std::make_pair(name, m_nodes[""]) );
-            m_indices.insert( std::make_pair(name, m_indices[""]) );
-            m_nodeInputs.insert( std::make_pair(name, m_nodeInputs[""]) );
+            // Initialize empty tree
+            m_nodes.insert( std::make_pair(name, std::vector<size_t>()) );
+            m_indices.insert( std::make_pair(name, std::vector<std::vector<size_t>>()) );
+            m_nodeInputs.insert( std::make_pair(name, std::vector<std::vector<size_t>>()) );
+
         }
 
     private:

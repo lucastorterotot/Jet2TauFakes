@@ -75,67 +75,24 @@ bool FakeFactor::addNode(WrapperPtr fct,
             return false;
         }
     }
-    m_wrappers.push_back(fct);
-    sys_nodes->second.push_back( m_wrappers.size()-1 );
+    // Search if fct has already been inserted
+    size_t fctIndex = 0;
+    bool found = false;
+    for(size_t i=0; i<m_wrappers.size(); i++)
+    {
+        if(m_wrappers[i]->name()==fct->name())
+        {
+            fctIndex = i;
+            found = true;
+            break;
+        }
+    }
+    if(!found) m_wrappers.push_back(fct);
+    sys_nodes->second.push_back( found ? fctIndex : m_wrappers.size()-1 );
     sys_indices->second.push_back(sons);
     sys_inputs->second.push_back(vars);
     return true;
 }
 
 
-/*****************************************************************/
-bool FakeFactor::replaceNode(const std::string& node,
-        WrapperPtr fct,
-        const std::vector<size_t>& sons,
-        const std::vector<size_t>& vars,
-        const std::string& sys
-        )
-/*****************************************************************/
-{
-    if(!fct)
-    {
-        std::cout<<"[FakeFactor] ERROR: Trying to add a nullptr\n";
-        return false;
-    }
-    auto sys_nodes = m_nodes.find(sys);
-    if(sys_nodes==m_nodes.end())
-    {
-        std::cout<<"[FakeFactor] ERROR: Non registered systematic "<<sys<<"\n";
-        return false;
-    }
-    // require that the son indices already exist
-    for(size_t i : sons) 
-    {
-        if(i>=sys_nodes->second.size())
-        {
-            std::cout<<"[FakeFactor] ERROR: Trying to add a node with non-existing sons\n";
-            return false;
-        }
-    }
-    // Search node to be replaced
-    size_t nodeIndex = 0;
-    bool found = false;
-    for(size_t i=0; i<sys_nodes->second.size(); i++)
-    {
-        size_t index = sys_nodes->second[i];
-        if(m_wrappers[index]->name()==node)
-        {
-            nodeIndex = i;
-            found = true;
-            break;
-        }
-    }
-    if(!found)
-    {
-        std::cout<<"[FakeFactor] ERROR: Trying to replace a non-existing node\n";
-        return false;
-    }
-    auto sys_indices = m_indices.find(sys);
-    auto sys_inputs = m_nodeInputs.find(sys);
-    // replace node
-    m_wrappers.push_back(fct);
-    sys_nodes->second[nodeIndex] = m_wrappers.size()-1;
-    sys_indices->second[nodeIndex] = sons;
-    sys_inputs->second[nodeIndex] = vars;
-    return true;
-}
+
