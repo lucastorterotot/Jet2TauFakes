@@ -17,7 +17,11 @@ FakeFactor::~FakeFactor()
 
 
 /*****************************************************************/
-double FakeFactor::value(const std::vector<double>& xs, std::vector<WrapperItr>& nodes, std::vector<std::vector<size_t>>& indicesVec, std::vector<std::vector<size_t>>& inputsVec, size_t index)
+double FakeFactor::value(const std::vector<double>& xs,
+        std::vector<size_t>& nodesVec,
+        std::vector<std::vector<size_t>>& indicesVec,
+        std::vector<std::vector<size_t>>& inputsVec,
+        size_t index)
 /*****************************************************************/
 {
     // TODO: add xs size check
@@ -26,26 +30,27 @@ double FakeFactor::value(const std::vector<double>& xs, std::vector<WrapperItr>&
     {
         std::vector<double> values;
         values.reserve(indices.size());
-        for(size_t i : indices) values.push_back( value(xs,i) );
-        auto& node = *nodes[index];
-        //std::cout<<node->name()<<" = "<<node->value(values)<<"\n";
+        for(size_t i : indices) values.push_back( value(xs, nodesVec, indicesVec, inputsVec, i) );
+        auto& node = m_wrappers.at(nodesVec[index]);
         return node->value(values);
     }
     else // Leaf
     {
-        auto& leaf = *nodes[index];
+        auto& leaf = m_wrappers.at(nodesVec[index]);
         const auto& inputs = inputsVec[index];
         std::vector<double> xssubset;
         xssubset.reserve(inputs.size());
         for(size_t i : inputs) xssubset.push_back( xs[i] );
-        //std::cout<<leaf->name()<<" = "<<leaf->value(xssubset)<<"\n";
         return leaf->value(xssubset);
     }
 }
 
 
 /*****************************************************************/
-bool FakeFactor::addNode(WrapperPtr fct, const std::vector<size_t>& sons, const std::vector<size_t>& vars, const std::string& sys)
+bool FakeFactor::addNode(WrapperPtr fct,
+        const std::vector<size_t>& sons,
+        const std::vector<size_t>& vars,
+        const std::string& sys)
 /*****************************************************************/
 {
     if(!fct)
@@ -53,14 +58,14 @@ bool FakeFactor::addNode(WrapperPtr fct, const std::vector<size_t>& sons, const 
         std::cout<<"[FakeFactor] ERROR: Trying to add a nullptr\n";
         return false;
     }
-    auto& sys_nodes = m_nodes.find(sys);
-    if(sys_wrapper==m_nodes.end())
+    auto sys_nodes = m_nodes.find(sys);
+    if(sys_nodes==m_nodes.end())
     {
         std::cout<<"[FakeFactor] ERROR: Non registered systematic "<<sys<<"\n";
         return false;
     }
-    auto& sys_indices = m_indices.find(sys);
-    auto& sys_inputs = m_nodeInputs.find(sys);
+    auto sys_indices = m_indices.find(sys);
+    auto sys_inputs = m_nodeInputs.find(sys);
     // require that the son indices already exist (avoid cycles)
     for(size_t i : sons) 
     {
@@ -71,7 +76,7 @@ bool FakeFactor::addNode(WrapperPtr fct, const std::vector<size_t>& sons, const 
         }
     }
     m_wrappers.push_back(fct);
-    sys_nodes->second.push_back(m_wrappers.end()-1);
+    sys_nodes->second.push_back( m_wrappers.size()-1 );
     sys_indices->second.push_back(sons);
     sys_inputs->second.push_back(vars);
     return true;
@@ -79,7 +84,12 @@ bool FakeFactor::addNode(WrapperPtr fct, const std::vector<size_t>& sons, const 
 
 
 /*****************************************************************/
-bool FakeFactor::replaceNode(const std::string& sys, const std::string& node, WrapperPtr fct, const std::vector<size_t>& sons)
+bool FakeFactor::replaceNode(const std::string& node,
+        WrapperPtr fct,
+        const std::vector<size_t>& sons,
+        const std::vector<size_t>& vars,
+        const std::string& sys
+        )
 /*****************************************************************/
 {
     if(!fct)
@@ -87,8 +97,8 @@ bool FakeFactor::replaceNode(const std::string& sys, const std::string& node, Wr
         std::cout<<"[FakeFactor] ERROR: Trying to add a nullptr\n";
         return false;
     }
-    auto& sys_nodes = m_sysNodes.find(sys);
-    if(sys_wrapper==m_sysNodes.end())
+    auto sys_nodes = m_nodes.find(sys);
+    if(sys_nodes==m_nodes.end())
     {
         std::cout<<"[FakeFactor] ERROR: Non registered systematic "<<sys<<"\n";
         return false;
@@ -102,4 +112,6 @@ bool FakeFactor::replaceNode(const std::string& sys, const std::string& node, Wr
             return false;
         }
     }
+    /// TODO: implementation
+    return true;
 }
