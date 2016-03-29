@@ -17,9 +17,13 @@ class WrapperTH2F : public IFunctionWrapper
         double value(size_t size, const double* xs) override
         {
             if(size<2) return 0.;
-            // FIXME: don't use overflow bins
             int bx = m_histo.GetXaxis()->FindBin(xs[0]);
             int by = m_histo.GetYaxis()->FindBin(xs[1]);
+            // Don't use overflow bins
+            if(bx>m_histo.GetNbinsX()) bx = m_histo.GetNbinsX();
+            else if(bx==0) bx = 1;
+            if(by>m_histo.GetNbinsY()) by = m_histo.GetNbinsY();
+            else if(by==0) by = 1;
             return m_histo.GetBinContent(bx,by);
         }
         double value(const std::vector<double>& xs) override
