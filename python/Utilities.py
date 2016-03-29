@@ -26,6 +26,18 @@ class Node:
         self.formula = other.formula
         self.leaves  = other.leaves
 
+    def find(self, name):
+        if self.name==name:
+            return self
+        else:
+            for leaf in self.leaves:
+                found = leaf.find(name)
+                if found: return found
+        return None
+
+    def __str__(self):
+        return self.name
+
     def __eq__(self,other):
         return  self.name==other.name
 
@@ -61,6 +73,14 @@ class Leaf:
         self.object = other.object
         self.vars = other.vars
 
+    def find(self, name):
+        if self.name==name: 
+            return self
+        else: return None
+
+    def __str__(self):
+        return self.name
+
     def __eq__(self,other):
         return  self.name==other.name
 
@@ -73,6 +93,25 @@ def flatten(node):
     elif isinstance(node, Leaf):
         nodes.append(node)
     return nodes
+
+def find_node(node, name):
+    nodes = flatten(node)
+    for n in nodes:
+        if n.name==name:
+            return n
+    return None
+
+def print_tree(node, depth=0):
+    string = ''
+    for d in xrange(depth-1): string += '  '
+    if depth>0: string += '| '
+    print string
+    string = '  '*(depth-1)+'\_' if depth>0 else ''
+    string += str(node)
+    print string
+    if isinstance(node, Node):
+        for leaf in node.leaves:
+            print_tree(leaf, depth+1)
 
 
 class FakeFactor:
@@ -126,7 +165,10 @@ def replace(node, name, newnode):
         # else replace name in formula and apply replace on leaves
         node.formula = node.formula.replace('{'+name+'}', '{'+newnode.name+'}')
         for i,leaf in enumerate(node.leaves):
-            replace(leaf, name, newnode)
+            if leaf.name==name:
+                node.leaves[i] = newnode
+            else:
+                replace(leaf, name, newnode)
     elif isinstance(node, Leaf):
         if node.name==name:
             node.replace(newnode)
