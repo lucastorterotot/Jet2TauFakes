@@ -18,5 +18,7 @@ Test direct access to fake-factor objects:
 `python test.py`  
 Test python utilities for more user-friendly access:  
 `python test_utilities.py`  
+Test systematic definitions:  
+`python test_sys.py` 
 
 
