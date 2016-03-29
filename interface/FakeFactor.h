@@ -28,6 +28,12 @@ class FakeFactor
         };
         virtual ~FakeFactor();
 
+        // Retrieving input list
+        const std::vector<std::string>& inputs() {return m_inputs;}
+
+        // Retrieving nodes
+        const std::vector<WrapperPtr>& nodes() {return m_wrappers;}
+
         // Retrieving fake factors
         double value(size_t size, const double* xs, const std::string& sys="")
         {
