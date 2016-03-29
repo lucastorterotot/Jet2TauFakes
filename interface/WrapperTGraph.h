@@ -10,12 +10,21 @@ class WrapperTGraph : public IFunctionWrapper
 {
 
     public:
-        WrapperTGraph():IFunctionWrapper() {};
-        WrapperTGraph(const TGraph& g, const std::string& name):IFunctionWrapper(name),m_graph(g) {};
+        WrapperTGraph():IFunctionWrapper(),m_min(0.),m_max(0.) {};
+        WrapperTGraph(const TGraph& g, const std::string& name):IFunctionWrapper(name),m_graph(g) 
+        {
+            // store x min and max
+            double miny, maxy; // temporary variables
+            g.ComputeRange(m_min, miny, m_max, maxy);
+        };
         virtual ~WrapperTGraph();
 
         double value(size_t size, const double* xs) override
         {
+            double input = xs[0];
+            // Avoid out-of-range extrapolation
+            if(input>m_max) input = m_max; 
+            else if(input<m_min) input = m_min;
             return (size>0 ? m_graph.Eval(xs[0]) : 0.);
         }
         double value(const std::vector<double>& xs) override
@@ -25,6 +34,7 @@ class WrapperTGraph : public IFunctionWrapper
 
     private:
         TGraph m_graph;
+        double m_min, m_max;
 
 
     //private:

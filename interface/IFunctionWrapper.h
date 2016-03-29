@@ -16,7 +16,7 @@ class IFunctionWrapper
         IFunctionWrapper(const std::string& name):m_name(name) {};
         virtual ~IFunctionWrapper();
 
-        const std::string& name() {return m_name;} 
+        const std::string& name() const {return m_name;} 
         virtual double value(size_t, const double*) {return 0.;}
         virtual double value(const std::vector<double>&) {return 0.;}
 

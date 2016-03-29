@@ -21,6 +21,23 @@ class Node:
         wtformula = ROOT.WrapperTFormula(tformula, self.name)
         return wtformula
 
+    def replace(self, other):
+        self.name    = other.name
+        self.formula = other.formula
+        self.leaves  = other.leaves
+
+    def find(self, name):
+        if self.name==name:
+            return self
+        else:
+            for leaf in self.leaves:
+                found = leaf.find(name)
+                if found: return found
+        return None
+
+    def __str__(self):
+        return self.name
+
     def __eq__(self,other):
         return  self.name==other.name
 
@@ -31,7 +48,6 @@ class Leaf:
         self.file = file
         self.object = object
         self.vars = vars
-        self.index = 0
 
     def create(self):
         file = ROOT.TFile.Open(self.file)
@@ -51,8 +67,52 @@ class Leaf:
         file.Close()
         return wobject
 
+    def replace(self, other):
+        self.name = other.name
+        self.file = other.file
+        self.object = other.object
+        self.vars = other.vars
+
+    def find(self, name):
+        if self.name==name: 
+            return self
+        else: return None
+
+    def __str__(self):
+        return self.name
+
     def __eq__(self,other):
         return  self.name==other.name
+
+def flatten(node):
+    nodes = []
+    if isinstance(node, Node):
+        for leaf in node.leaves:
+            nodes.extend(flatten(leaf))
+        nodes.append(node)
+    elif isinstance(node, Leaf):
+        nodes.append(node)
+    return nodes
+
+def find_node(node, name):
+    nodes = flatten(node)
+    for n in nodes:
+        if n.name==name:
+            return n
+    return None
+
+def print_tree(node, depth=0):
+    string = ''
+    for d in xrange(depth-1): string += '  '
+    if depth>0: string += '| '
+    print string
+    string = '  '*(depth-1)+'\_' if depth>0 else ''
+    string += str(node)
+    print string
+    if isinstance(node, Node):
+        for leaf in node.leaves:
+            print_tree(leaf, depth+1)
+
 
 class FakeFactor:
     def __init__(self, vars):
@@ -60,29 +120,67 @@ class FakeFactor:
         self.vars = vars
         self.wrapperlist = []
         self.nodelist = []
+        self.sys_nodelist = {'':[]}
 
-    def addNode(self, node):
+    def addNode(self, node, sys=''):
         wrapper = node.create()
-        leaves = [self.nodelist.index(l) for l in node.leaves] if isinstance(node, Node) else []
+        leaves = [self.sys_nodelist[sys].index(l) for l in node.leaves] if isinstance(node, Node) else []
         vars = [self.vars.index(v) for v in node.vars] if isinstance(node, Leaf) else []
         self.fakefactor.addNode(wrapper,
                                 len(leaves), array('L', leaves if len(leaves)>0 else [0]),
-                                len(vars), array('L', vars if len(vars)>0 else [0])
+                                len(vars), array('L', vars if len(vars)>0 else [0]),
+                                sys
                                )
-        self.wrapperlist.append(wrapper)
-        self.nodelist.append(node)
+        if node not in self.nodelist:
+            self.wrapperlist.append(wrapper)
+            self.nodelist.append(node)
+        if node not in self.sys_nodelist[sys]:
+            self.sys_nodelist[sys].append(node)
 
-    def value(self, inputs):
-        return self.fakefactor.value(len(inputs), array('d', inputs))
+    def systematics(self):
+        return self.fakefactor.systematics()
+
+    def value(self, inputs, sys=''):
+        return self.fakefactor.value(len(inputs), array('d', inputs), sys)
 
 
 
-def fill(fakefactor, node):
+def fill(fakefactor, node, sys=''):
+    if sys not in fakefactor.sys_nodelist: 
+        fakefactor.sys_nodelist[sys] = []
+        if sys!='': fakefactor.fakefactor.registerSystematic(sys)
     if isinstance(node, Node):
         for leaf in node.leaves:
-            fill(fakefactor, leaf)
-        fakefactor.addNode(node)
+            fill(fakefactor, leaf, sys)
+        fakefactor.addNode(node, sys)
     elif isinstance(node, Leaf):
-        fakefactor.addNode(node)
+        fakefactor.addNode(node, sys)
     else:
         raise StandardError('Incompatible fake factor node/leaf type '+str(node.__class__))
+
+
+def replace(node, name, newnode):
+    if isinstance(node, Node):
+        # if this is the node to be replaced
+        if node.name==name:
+            node.replace(newnode)
+            return
+        # else replace name in formula and apply replace on leaves
+        node.formula = node.formula.replace('{'+name+'}', '{'+newnode.name+'}')
+        for i,leaf in enumerate(node.leaves):
+            if leaf.name==name:
+                node.leaves[i] = newnode
+            else:
+                replace(leaf, name, newnode)
+    elif isinstance(node, Leaf):
+        if node.name==name:
+            node.replace(newnode)
+            return
+
+def replace_nodes(root, replacements):
+    rootcopy = copy.deepcopy(root)
+    for name, newnode in replacements.items():
+        replace(rootcopy, name, newnode)
+    return rootcopy
+
+        
