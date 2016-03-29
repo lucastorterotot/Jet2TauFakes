@@ -150,6 +150,11 @@ fill(ff_comb, comb_sys_nonclosure_w, sys='nonclosure_w')
 fill(ff_comb, comb_sys_highmt_stat_up, sys='highmt_stat_up')
 fill(ff_comb, comb_sys_highmt_stat_down, sys='highmt_stat_down')
 
+sys_names = ff_comb.systematics()
+print 'List of systematics defined in the fake factor object:'
+for s in sys_names:
+    print "  '"+s+"'"
+
 
 ## Save fake factors
 file = ROOT.TFile.Open("fakeFactor_sys.root", "recreate")

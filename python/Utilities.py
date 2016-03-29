@@ -137,6 +137,9 @@ class FakeFactor:
         if node not in self.sys_nodelist[sys]:
             self.sys_nodelist[sys].append(node)
 
+    def systematics(self):
+        return self.fakefactor.systematics()
+
     def value(self, inputs, sys=''):
         return self.fakefactor.value(len(inputs), array('d', inputs), sys)
 

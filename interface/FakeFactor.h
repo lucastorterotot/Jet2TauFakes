@@ -34,6 +34,14 @@ class FakeFactor
         // Retrieving nodes
         const std::vector<WrapperPtr>& nodes() {return m_wrappers;}
 
+        // Retrieving list of systematic sources
+        std::vector<std::string> systematics()
+        {
+            std::vector<std::string> sys;
+            for(const auto& sys_node : m_nodes) sys.push_back(sys_node.first);  
+            return sys;
+        }
+
         // Retrieving fake factors
         double value(size_t size, const double* xs, const std::string& sys="")
         {
