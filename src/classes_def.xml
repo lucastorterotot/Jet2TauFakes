@@ -4,6 +4,7 @@
  <class name="WrapperTGraph"/>
  <class name="WrapperTFormula"/>
  <class name="WrapperTH2F"/>
+ <class name="WrapperTH2D"/>
  <class name="FakeFactor"/>
  <class name="std::map<std::string, std::vector<size_t> >"/>
  <class name="std::map<std::string, std::vector<std::vector<size_t> > >"/>
