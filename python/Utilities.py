@@ -62,6 +62,8 @@ class Leaf:
             wobject = ROOT.WrapperTGraph(object, self.name)
         elif isinstance(object, ROOT.TH2F):
             wobject = ROOT.WrapperTH2F(object, self.name)
+        elif isinstance(object, ROOT.TH2D):
+            wobject = ROOT.WrapperTH2D(object, self.name)
         else:
             raise StandardError('Undefined wrapper for object of class '+str(object.__class__))
         file.Close()
