@@ -60,6 +60,8 @@ class Leaf:
         wobject = None
         if isinstance(object, ROOT.TGraph):
             wobject = ROOT.WrapperTGraph(object, self.name)
+        elif isinstance(object, ROOT.TH1D):
+            wobject = ROOT.WrapperTH1D(object, self.name)
         elif isinstance(object, ROOT.TH2F):
             wobject = ROOT.WrapperTH2F(object, self.name)
         elif isinstance(object, ROOT.TH2D):

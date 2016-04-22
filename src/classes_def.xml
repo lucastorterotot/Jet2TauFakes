@@ -3,6 +3,7 @@
  <class name="IFunctionWrapper"/>
  <class name="WrapperTGraph"/>
  <class name="WrapperTFormula"/>
+ <class name="WrapperTH1D"/>
  <class name="WrapperTH2F"/>
  <class name="WrapperTH2D"/>
  <class name="FakeFactor"/>
