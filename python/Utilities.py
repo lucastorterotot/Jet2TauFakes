@@ -121,6 +121,8 @@ def print_tree(node, depth=0):
 class FakeFactor:
     def __init__(self, vars):
         self.fakefactor = ROOT.FakeFactor()
+        for var in vars:
+            self.fakefactor.addInput(var)
         self.vars = vars
         self.wrapperlist = []
         self.nodelist = []

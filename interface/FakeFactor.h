@@ -28,6 +28,15 @@ class FakeFactor : public TObject
             m_indices.insert( std::make_pair("", std::vector<std::vector<size_t>>()) );
             m_nodeInputs.insert( std::make_pair("", std::vector<std::vector<size_t>>()) );
         };
+        FakeFactor(const std::vector<std::string>& inputs) 
+        {
+            // Store input variable names
+            m_inputs = inputs;
+            // Initialize nominal empty tree
+            m_nodes.insert( std::make_pair("", std::vector<size_t>()) );
+            m_indices.insert( std::make_pair("", std::vector<std::vector<size_t>>()) );
+            m_nodeInputs.insert( std::make_pair("", std::vector<std::vector<size_t>>()) );
+        };
         virtual ~FakeFactor();
 
         // Retrieving input list
@@ -61,6 +70,12 @@ class FakeFactor : public TObject
             auto sys_indices = m_indices.find(sys);
             auto sys_inputs = m_nodeInputs.find(sys);
             return value(xs, sys_nodes->second, sys_indices->second, sys_inputs->second, sys_nodes->second.size()-1); // evaluate the root
+        }
+
+        // Adding an input name
+        void addInput(const std::string& input)
+        {
+            m_inputs.push_back(input);
         }
 
         // Manipulating trees
