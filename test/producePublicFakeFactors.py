@@ -91,7 +91,7 @@ qcd_ss_down = replace_nodes(
     {'ff_qcd_ss':
      Node(
          name='ff_qcd_ss_down',
-         formula='(1.-{sys_qcd_down})*{ff_qcd_ss}',
+         formula='max(0.,1.-{sys_qcd_down})*{ff_qcd_ss}',
          leaves=[
              Leaf(
                  name='sys_qcd_down',
@@ -127,7 +127,7 @@ qcd_os_down = replace_nodes(
     {'ff_qcd_os':
      Node(
          name='ff_qcd_os_down',
-         formula='(1.-{sys_qcd_down})*{ff_qcd_os}',
+         formula='max(0.,1.-{sys_qcd_down})*{ff_qcd_os}',
          leaves=[
              Leaf(
                  name='sys_qcd_down',
@@ -190,7 +190,7 @@ w_down = replace_nodes(
     {'ff_w':
      Node(
          name='ff_w_down',
-         formula='(1.-{sys_w_down})*{ff_w}',
+         formula='max(0.,1.-{sys_w_down})*{ff_w}',
          leaves=[
              Leaf(
                  name='sys_w_down',
@@ -228,7 +228,7 @@ tt_up = Node(
      )
 tt_down = Node(
          name='ff_tt_down',
-         formula='(1.-{sys_tt})*{ff_tt}',
+         formula='max(0.,1.-{sys_tt})*{ff_tt}',
          leaves=[
              tt_up.find('sys_tt'),
              tt.find('ff_tt')
@@ -297,7 +297,7 @@ comb_qcd_down = replace_nodes(
     {'ff_qcd_os':
      Node(
          name='ff_qcd_os_down',
-         formula='(1.-{sys_qcd_down})*{ff_qcd_os}',
+         formula='max(0.,1.-{sys_qcd_down})*{ff_qcd_os}',
          leaves=[
              Leaf(
                  name='sys_qcd_down',
@@ -333,7 +333,7 @@ comb_w_down = replace_nodes(
     {'ff_w':
      Node(
          name='ff_w_down',
-         formula='(1.-{sys_w_down})*{ff_w}',
+         formula='max(0.,1.-{sys_w_down})*{ff_w}',
          leaves=[
              Leaf(
                  name='sys_w_down',
@@ -369,7 +369,7 @@ comb_tt_down = replace_nodes(
     {'ff_tt':
      Node(
          name='ff_tt_down',
-         formula='(1.-{sys_tt})*{ff_tt}',
+         formula='max(0.,1.-{sys_tt})*{ff_tt}',
          leaves=[
              comb_tt_up.find('sys_tt'),
              comb.find('ff_tt')
