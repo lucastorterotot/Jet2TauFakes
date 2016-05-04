@@ -3,7 +3,7 @@ import ROOT
 import os
 
 ## Meta-data
-version = '20160425'
+version = '20160503'
 tag     = 'v0.1.3'
 
 # Individual fake factors
@@ -206,12 +206,25 @@ w_down = replace_nodes(
 
 
 ### TTbar fake factors
-tt = Leaf(
+tt = Node(
     name='ff_tt',
-    file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/ff_tt.root'.format(HOME=home,VERSION=version),
-    object='c_t_2d',
-    vars=['tau_pt','tau_decay']
+    formula='{ff_raw_tt}*{mviscorr_tt}',
+    leaves=[
+        Leaf(
+            name='ff_raw_tt',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/ff_tt.root'.format(HOME=home,VERSION=version),
+            object='c_t_2d',
+            vars=['tau_pt','tau_decay']
+            ),
+        Leaf(
+            name='mviscorr_tt',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/corr_smooth_tt_mvis.root'.format(HOME=home,VERSION=version),
+            object='corr_smoothed',
+            vars=['mvis']
+            ),
+        ]
 )
+
 # Define systematics
 tt_up = Node(
          name='ff_tt_up',
@@ -219,8 +232,8 @@ tt_up = Node(
          leaves=[
              Leaf(
                  name='sys_tt',
-                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/sys_TT_J_nonclosure_mvis.root'.format(HOME=home,VERSION=version),
-                 object='sys',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/sys_smooth_tt_nonclosure_mvis.root'.format(HOME=home,VERSION=version),
+                 object='sys_smoothed',
                  vars=['mvis']
              ),
              tt.find('ff_tt')
@@ -355,8 +368,8 @@ comb_tt_up = replace_nodes(
          leaves=[
              Leaf(
                  name='sys_tt',
-                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/sys_TT_J_nonclosure_mvis.root'.format(HOME=home,VERSION=version),
-                 object='sys',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/sys_smooth_tt_nonclosure_mvis.root'.format(HOME=home,VERSION=version),
+                 object='sys_smoothed',
                  vars=['mvis']
              ),
              comb.find('ff_tt')
