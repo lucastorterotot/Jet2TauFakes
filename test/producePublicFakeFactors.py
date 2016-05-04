@@ -4,7 +4,7 @@ import os
 
 ## Meta-data
 version = '20160503'
-tag     = 'v0.1.4'
+tag     = 'v0.1.3'
 
 # Individual fake factors
 ff_qcd_os = FakeFactor(vars=['tau_pt', 'tau_decay', 'mvis', 'mu_iso'])
