@@ -3,7 +3,7 @@ import ROOT
 import os
 
 ## Meta-data
-version = '20160503'
+version = '20160511'
 tag     = 'v0.1.3'
 
 # Individual fake factors
@@ -226,8 +226,8 @@ tt = Node(
 )
 
 # Define systematics
-tt_up = Node(
-         name='ff_tt_up',
+tt_corr_up = Node(
+         name='ff_tt_corr_up',
          formula='(1.+{sys_tt})*{ff_tt}',
          leaves=[
              Leaf(
@@ -239,15 +239,36 @@ tt_up = Node(
              tt.find('ff_tt')
          ]
      )
-tt_down = Node(
-         name='ff_tt_down',
+tt_corr_down = Node(
+         name='ff_tt_corr_down',
          formula='max(0.,1.-{sys_tt})*{ff_tt}',
          leaves=[
-             tt_up.find('sys_tt'),
+             tt_corr_up.find('sys_tt'),
              tt.find('ff_tt')
          ]
      )
 
+tt_stat_up = Node(
+         name='ff_tt_stat_up',
+         formula='(1.+{stat_tt})*{ff_tt}',
+         leaves=[
+             Leaf(
+                 name='stat_tt',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/toyerr_smooth_tt_mvis.root'.format(HOME=home,VERSION=version),
+                 object='hh_t_mvis_smoothed',
+                 vars=['mvis']
+             ),
+             tt.find('ff_tt')
+         ]
+     )
+tt_stat_down = Node(
+         name='ff_tt_stat_down',
+         formula='max(0.,1.-{stat_tt})*{ff_tt}',
+         leaves=[
+             tt_stat_up.find('stat_tt'),
+             tt.find('ff_tt')
+         ]
+     )
 
 
 ### Combined fake factors
@@ -286,7 +307,295 @@ comb = Node(
         ),
     ]
 )
+
 # Define systematics
+
+#Systematics: fractions
+comb_frac_w_up = Node(
+    name='ff_comb_frac_w_up',
+    formula='{frac_tt_w_up}*{ff_tt} + ({frac_w_w_up}+{frac_dy_w_up})*{ff_w} + {frac_qcd_w_up}*{ff_qcd_os}',
+    leaves=[
+        # Individual fake factors
+        qcd_os,
+        w,
+        tt,
+        # Fractions
+        Leaf(
+            name='frac_qcd_w_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_wjets.root'.format(HOME=home,VERSION=version),
+            object='h_wQ_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_w_w_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_wjets.root'.format(HOME=home,VERSION=version),
+            object='h_w_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_dy_w_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_wjets.root'.format(HOME=home,VERSION=version),
+            object='h_wD_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_tt_w_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_wjets.root'.format(HOME=home,VERSION=version),
+            object='h_wT_high_2d',
+            vars=['mt','tau_decay']
+        ),
+    ]
+)
+comb_frac_w_down = Node(
+    name='ff_comb_frac_w_down',
+    formula='{frac_tt_w_down}*{ff_tt} + ({frac_w_w_down}+{frac_dy_w_down})*{ff_w} + {frac_qcd_w_down}*{ff_qcd_os}',
+    leaves=[
+        # Individual fake factors
+        qcd_os,
+        w,
+        tt,
+        # Fractions
+        Leaf(
+            name='frac_qcd_w_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_wjets.root'.format(HOME=home,VERSION=version),
+            object='h_wQ_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_w_w_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_wjets.root'.format(HOME=home,VERSION=version),
+            object='h_w_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_dy_w_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_wjets.root'.format(HOME=home,VERSION=version),
+            object='h_wD_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_tt_w_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_wjets.root'.format(HOME=home,VERSION=version),
+            object='h_wT_low_2d',
+            vars=['mt','tau_decay']
+        ),
+    ]
+)
+
+comb_frac_qcd_up = Node(
+    name='ff_comb_frac_qcd_up',
+    formula='{frac_tt_qcd_up}*{ff_tt} + ({frac_w_qcd_up}+{frac_dy_qcd_up})*{ff_w} + {frac_qcd_qcd_up}*{ff_qcd_os}',
+    leaves=[
+        # Individual fake factors
+        qcd_os,
+        w,
+        tt,
+        # Fractions
+        Leaf(
+            name='frac_qcd_qcd_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_qcd.root'.format(HOME=home,VERSION=version),
+            object='h_w_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_w_qcd_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_qcd.root'.format(HOME=home,VERSION=version),
+            object='h_wW_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_dy_qcd_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_qcd.root'.format(HOME=home,VERSION=version),
+            object='h_wD_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_tt_qcd_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_qcd.root'.format(HOME=home,VERSION=version),
+            object='h_wT_high_2d',
+            vars=['mt','tau_decay']
+        ),
+    ]
+)
+comb_frac_qcd_down = Node(
+    name='ff_comb_frac_qcd_down',
+    formula='{frac_tt_qcd_down}*{ff_tt} + ({frac_w_qcd_down}+{frac_dy_qcd_down})*{ff_w} + {frac_qcd_qcd_down}*{ff_qcd_os}',
+    leaves=[
+        # Individual fake factors
+        qcd_os,
+        w,
+        tt,
+        # Fractions
+        Leaf(
+            name='frac_qcd_qcd_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_qcd.root'.format(HOME=home,VERSION=version),
+            object='h_w_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_w_qcd_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_qcd.root'.format(HOME=home,VERSION=version),
+            object='h_wW_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_dy_qcd_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_qcd.root'.format(HOME=home,VERSION=version),
+            object='h_wD_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_tt_qcd_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_qcd.root'.format(HOME=home,VERSION=version),
+            object='h_wT_low_2d',
+            vars=['mt','tau_decay']
+        ),
+    ]
+)
+
+comb_frac_tt_up = Node(
+    name='ff_comb_frac_tt_up',
+    formula='{frac_tt_tt_up}*{ff_tt} + ({frac_w_tt_up}+{frac_dy_tt_up})*{ff_w} + {frac_qcd_tt_up}*{ff_qcd_os}',
+    leaves=[
+        # Individual fake factors
+        qcd_os,
+        w,
+        tt,
+        # Fractions
+        Leaf(
+            name='frac_qcd_tt_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_tt.root'.format(HOME=home,VERSION=version),
+            object='h_wQ_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_w_tt_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_tt.root'.format(HOME=home,VERSION=version),
+            object='h_wW_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_dy_tt_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_tt.root'.format(HOME=home,VERSION=version),
+            object='h_wD_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_tt_tt_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_tt.root'.format(HOME=home,VERSION=version),
+            object='h_w_high_2d',
+            vars=['mt','tau_decay']
+        ),
+    ]
+)
+comb_frac_tt_down = Node(
+    name='ff_comb_frac_tt_down',
+    formula='{frac_tt_tt_down}*{ff_tt} + ({frac_w_tt_down}+{frac_dy_tt_down})*{ff_w} + {frac_qcd_tt_down}*{ff_qcd_os}',
+    leaves=[
+        # Individual fake factors
+        qcd_os,
+        w,
+        tt,
+        # Fractions
+        Leaf(
+            name='frac_qcd_tt_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_tt.root'.format(HOME=home,VERSION=version),
+            object='h_wQ_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_w_tt_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_tt.root'.format(HOME=home,VERSION=version),
+            object='h_wW_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_dy_tt_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_tt.root'.format(HOME=home,VERSION=version),
+            object='h_wD_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_tt_tt_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_tt.root'.format(HOME=home,VERSION=version),
+            object='h_w_low_2d',
+            vars=['mt','tau_decay']
+        ),
+    ]
+)
+
+comb_frac_dy_up = Node(
+    name='ff_comb_frac_dy_up',
+    formula='{frac_tt_dy_up}*{ff_tt} + ({frac_w_dy_up}+{frac_dy_dy_up})*{ff_w} + {frac_qcd_dy_up}*{ff_qcd_os}',
+    leaves=[
+        # Individual fake factors
+        qcd_os,
+        w,
+        tt,
+        # Fractions
+        Leaf(
+            name='frac_qcd_dy_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_dy.root'.format(HOME=home,VERSION=version),
+            object='h_wQ_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_w_dy_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_dy.root'.format(HOME=home,VERSION=version),
+            object='h_wW_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_dy_dy_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_dy.root'.format(HOME=home,VERSION=version),
+            object='h_w_high_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_tt_dy_up',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_dy.root'.format(HOME=home,VERSION=version),
+            object='h_wT_high_2d',
+            vars=['mt','tau_decay']
+        ),
+    ]
+)
+comb_frac_dy_down = Node(
+    name='ff_comb_frac_dy_down',
+    formula='{frac_tt_dy_down}*{ff_tt} + ({frac_w_dy_down}+{frac_dy_dy_down})*{ff_w} + {frac_qcd_dy_down}*{ff_qcd_os}',
+    leaves=[
+        # Individual fake factors
+        qcd_os,
+        w,
+        tt,
+        # Fractions
+        Leaf(
+            name='frac_qcd_dy_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_dy.root'.format(HOME=home,VERSION=version),
+            object='h_wQ_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_w_dy_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_dy.root'.format(HOME=home,VERSION=version),
+            object='h_wW_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_dy_dy_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_dy.root'.format(HOME=home,VERSION=version),
+            object='h_w_low_2d',
+            vars=['mt','tau_decay']
+        ),
+        Leaf(
+            name='frac_tt_dy_down',
+            file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/frac_dy.root'.format(HOME=home,VERSION=version),
+            object='h_wT_low_2d',
+            vars=['mt','tau_decay']
+        ),
+    ]
+)
+
+
 comb_qcd_up = replace_nodes(
     comb, 
     {'ff_qcd_os':
@@ -359,11 +668,11 @@ comb_w_down = replace_nodes(
      )
     }
 )
-comb_tt_up = replace_nodes(
+comb_tt_corr_up = replace_nodes(
     comb, 
     {'ff_tt':
      Node(
-         name='ff_tt_up',
+         name='ff_tt_corr_up',
          formula='(1.+{sys_tt})*{ff_tt}',
          leaves=[
              Leaf(
@@ -377,14 +686,45 @@ comb_tt_up = replace_nodes(
      )
     }
 )
-comb_tt_down = replace_nodes(
+comb_tt_corr_down = replace_nodes(
     comb, 
     {'ff_tt':
      Node(
-         name='ff_tt_down',
+         name='ff_tt_corr_down',
          formula='max(0.,1.-{sys_tt})*{ff_tt}',
          leaves=[
-             comb_tt_up.find('sys_tt'),
+             comb_tt_corr_up.find('sys_tt'),
+             comb.find('ff_tt')
+         ]
+     )
+    }
+)
+comb_tt_stat_up = replace_nodes(
+    comb, 
+    {'ff_tt':
+     Node(
+         name='ff_tt_stat_up',
+         formula='(1.+{stat_tt})*{ff_tt}',
+         leaves=[
+             Leaf(
+                 name='stat_tt',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/toyerr_smooth_tt_mvis.root'.format(HOME=home,VERSION=version),
+                 object='hh_t_mvis_smoothed',
+                 vars=['mvis']
+             ),
+             comb.find('ff_tt')
+         ]
+     )
+    }
+)
+comb_tt_stat_down = replace_nodes(
+    comb, 
+    {'ff_tt':
+     Node(
+         name='ff_tt_stat_down',
+         formula='max(0.,1.-{stat_tt})*{ff_tt}',
+         leaves=[
+             comb_tt_stat_up.find('stat_tt'),
              comb.find('ff_tt')
          ]
      )
@@ -403,16 +743,27 @@ fill(ff_w     , w)
 fill(ff_w, w_up,   sys='ff_w_up')
 fill(ff_w, w_down, sys='ff_w_down')
 fill(ff_tt    , tt)
-fill(ff_tt, tt_up,   sys='ff_tt_up')
-fill(ff_tt, tt_down, sys='ff_tt_down')
+fill(ff_tt, tt_corr_up,   sys='ff_tt_corr_up')
+fill(ff_tt, tt_corr_down, sys='ff_tt_corr_down')
+fill(ff_tt, tt_stat_up,   sys='ff_tt_stat_up')
+fill(ff_tt, tt_stat_down, sys='ff_tt_stat_down')
 fill(ff_comb  , comb)
 fill(ff_comb, comb_qcd_up,   sys='ff_qcd_up')
 fill(ff_comb, comb_qcd_down, sys='ff_qcd_down')
 fill(ff_comb, comb_w_up,     sys='ff_w_up')
 fill(ff_comb, comb_w_down,   sys='ff_w_down')
-fill(ff_comb, comb_tt_up,    sys='ff_tt_up')
-fill(ff_comb, comb_tt_down,  sys='ff_tt_down')
-
+fill(ff_comb, comb_tt_corr_up,    sys='ff_tt_corr_up')
+fill(ff_comb, comb_tt_corr_down,  sys='ff_tt_corr_down')
+fill(ff_comb, comb_tt_stat_up,    sys='ff_tt_stat_up')
+fill(ff_comb, comb_tt_stat_down,  sys='ff_tt_stat_down')
+fill(ff_comb, comb_frac_w_up,   sys='frac_w_up')
+fill(ff_comb, comb_frac_w_down, sys='frac_w_down')
+fill(ff_comb, comb_frac_qcd_up,   sys='frac_qcd_up')
+fill(ff_comb, comb_frac_qcd_down, sys='frac_qcd_down')
+fill(ff_comb, comb_frac_tt_up,   sys='frac_tt_up')
+fill(ff_comb, comb_frac_tt_down, sys='frac_tt_down')
+fill(ff_comb, comb_frac_dy_up,   sys='frac_dy_up')
+fill(ff_comb, comb_frac_dy_down, sys='frac_dy_down')
 
 file = ROOT.TFile.Open("{HOME}/public/Htautau/FakeRate/{VERSION}/fakeFactors_{VERSION}.root".format(HOME=home,VERSION=version), "recreate")
 # Write meta-data
