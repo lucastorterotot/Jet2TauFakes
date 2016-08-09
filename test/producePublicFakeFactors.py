@@ -3,7 +3,7 @@ import ROOT
 import os
 
 ## Meta-data
-version = '20160511'
+version = '20160809'
 tag     = 'v0.1.3'
 
 # Individual fake factors
@@ -31,7 +31,7 @@ qcd_ss = Node(
         Leaf(
             name='mviscorr_qcd',
             file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/Correction_Data_QCD_MVis.root'.format(HOME=home,VERSION=version),
-            object='QCD_SS_MuAnti_Data_FFSSMuAntiData_mvis_correction',
+            object='QCD_SS_MuMedium_Data_FFSSMuMediumData_mvis_correction',
             vars=['mvis']
         ),
         Leaf(
@@ -56,7 +56,7 @@ qcd_os = Node(
         Leaf(
             name='mviscorr_qcd',
             file='{HOME}/public/Htautau/FakeRate/{VERSION}/pieces/Correction_Data_QCD_MVis.root'.format(HOME=home,VERSION=version),
-            object='QCD_SS_MuAnti_Data_FFSSMuAntiData_mvis_correction',
+            object='QCD_SS_MuMedium_Data_FFSSMuMediumData_mvis_correction',
             vars=['mvis']
         ),
         Leaf(
