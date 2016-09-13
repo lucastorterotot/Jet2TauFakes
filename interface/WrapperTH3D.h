@@ -16,7 +16,7 @@ class WrapperTH3D : public IFunctionWrapper
 
         double value(size_t size, const double* xs) override
         {
-            if(size<2) return 0.;
+            if(size<3) return 0.;
             int bx = m_histo.GetXaxis()->FindBin(xs[0]);
             int by = m_histo.GetYaxis()->FindBin(xs[1]);
             int bz = m_histo.GetZaxis()->FindBin(xs[2]);
