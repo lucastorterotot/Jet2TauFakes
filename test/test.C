@@ -1,73 +1,63 @@
-#include <vector>
-#include <iostream>
-#include "TFile.h"
-#include "TSystem.h"
-#include "TGraph.h"
-//#include "TGraphAsymmErrors.h"
-#include "TFormula.h"
-#include "TH2F.h"
-
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTGraph.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTH2F.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTFormula.h"
-#include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
 #include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
 
-void test()
-{
+void test_Sep2016(TString fname="/afs/cern.ch/user/j/jbrandst/public/Htautau/FakeRate/20160913/mt/incl/fakeFactors_20160913.root"){
 
-    TFile* fFakeFactorW  = TFile::Open("/afs/cern.ch/user/j/jsauvan/workspace/Projects/Htautau_Run2/Studies/FakeRate/ComputeFakeRates/plots/FakeFactors_Data_HighMT_2D/FakeFactors_Data_HighMT_2D.root");
-    TFile* fFakeFactorQCD  = TFile::Open("/afs/cern.ch/user/j/jsauvan/workspace/Projects/Htautau_Run2/Studies/FakeRate/ComputeFakeRates/plots/FakeFactors_Data_QCDSS_2D/FakeFactors_Data_QCDSS_2D.root");
-    TFile* fMtCorrection = TFile::Open("/afs/cern.ch/user/j/jsauvan/workspace/Projects/Htautau_Run2/Studies/FakeRate/ComputeMTCorrection/results/mtCorrections.root");
-    TFile* fFractions    = TFile::Open("/afs/cern.ch/user/j/jsauvan/workspace/Projects/Htautau_Run2/Studies/FakeRate/ComputeBackgroundFractions/results/backgroundFraction_Iso_Medium_mvis_vs_mt.root");
+  // Retrieve the fake factor
+  TFile* ff_file = TFile::Open(fname);
+  FakeFactor* ff    = (FakeFactor*)ff_file->Get("ff_comb");
+  FakeFactor* ff_tt = (FakeFactor*)ff_file->Get("ff_tt");
+  FakeFactor* ff_w = (FakeFactor*)ff_file->Get("ff_w");
+  FakeFactor* ff_qcd = (FakeFactor*)ff_file->Get("ff_qcd_os");
 
-    TH2F* fakeFactorW   = (TH2F*)fFakeFactorW->Get("FakeFactors_Data_HighMT_2D_Iso_Medium_InvertIso_Medium_tau_pt_vs_decayMode");
-    TH2F* fakeFactorQCD = (TH2F*)fFakeFactorQCD->Get("FakeFactors_Data_QCDSS_2D_Iso_Medium_InvertIso_Medium_tau_pt_vs_decayMode");
-    TGraph* mtCorrection = (TGraph*)fMtCorrection->Get("mt_correction");
-    TH2F* fractionW = (TH2F*)fFractions->Get("h_backgroundFraction_Iso_Medium_mvis_vs_mt_W_Nom");
-    TH2F* fractionQCD = (TH2F*)fFractions->Get("h_backgroundFraction_Iso_Medium_mvis_vs_mt_QCD_Nom");
-    TH2F* fractionTT = (TH2F*)fFractions->Get("h_backgroundFraction_Iso_Medium_mvis_vs_mt_TT_Nom");
-    TH2F* fractionVV = (TH2F*)fFractions->Get("h_backgroundFraction_Iso_Medium_mvis_vs_mt_VV_Nom");
-    TH2F* fractionZJ = (TH2F*)fFractions->Get("h_backgroundFraction_Iso_Medium_mvis_vs_mt_ZJ_Nom");
+  // Fill inputs
+  std::vector<double> inputs(6);
+  inputs[0] = 30; //tau_pt;
+  inputs[1] = 0;  //tau_decayMode;
+  inputs[2] = 1;  //njet
+  inputs[3] = 40; //mvis;
+  inputs[4] = 10; //mt;
+  inputs[5] = 0.00; //muon_iso;
+
+  // Retrieve fake factors
+  double ff_nom = ff->value(inputs); // nominal fake factor
+  double ff_nom_tt = ff_tt->value(inputs); // nominal fake factor tt
+  double ff_nom_w = ff_w->value(inputs);
+  double ff_nom_qcd = ff_qcd->value(inputs);
+
+  double frac_w = ff_w->value(inputs,"frac_w");
+  double frac_dy = ff_w->value(inputs,"frac_dy");
+  double frac_qcd = ff_qcd->value(inputs,"frac_qcd");
+  double frac_tt = ff_tt->value(inputs,"frac_tt");
+
+  double syst_qcd_up = ff_qcd->value(inputs, "ff_qcd_syst_up");
+  double syst_qcd_down = ff_qcd->value(inputs, "ff_qcd_syst_down");
+  double syst_w_up = ff_w->value(inputs, "ff_w_syst_up");
+  double syst_w_down = ff_w->value(inputs, "ff_w_syst_down");
+  double syst_tt_up = ff_tt->value(inputs, "ff_tt_syst_up");
+  double syst_tt_down = ff_tt->value(inputs, "ff_tt_syst_down");
+
+  double stat_qcd_up = ff_qcd->value(inputs, "ff_qcd_stat_up");
+  double stat_qcd_down = ff_qcd->value(inputs, "ff_qcd_stat_down");
+  double stat_w_up = ff_w->value(inputs, "ff_w_stat_up");
+  double stat_w_down = ff_w->value(inputs, "ff_w_stat_down");
+  double stat_tt_up = ff_tt->value(inputs, "ff_tt_stat_up");
+  double stat_tt_down = ff_tt->value(inputs, "ff_tt_stat_down");
+  
+  cout << "pt= " << inputs[0] << "\t dm= " << inputs[1] << "\t njet= " << inputs[2] << "\t mvis= " << inputs[3] << "\t mt= " << inputs[4] << "\t muiso= " << inputs[5] << endl;
+  cout << "ff= " << ff_nom << ", ff(tt)= " << ff_nom_tt  << ", ff(w)= " << ff_nom_w << ", ff(qcd)= " << ff_nom_qcd  << endl;
+  cout << "frac(tt)= " << frac_tt  << ", frac(w)= " << frac_w << ", frac(dy)= " << frac_dy << ", frac_qcd= " << frac_qcd  << endl;
+  cout << "Combined fake factor: " << ff_nom_tt*frac_tt+ff_nom_w*(frac_w+frac_dy)+ff_nom_qcd*frac_qcd << endl;
+  cout << " ----- Systematic uncertainties ----- " << endl;
+  cout << "Uncertainties on corrections: " << endl;
+  cout << "syst(tt)= " << (syst_tt_up-ff_nom_tt)/ff_nom_tt*100 << "%, syst(w)= " << (syst_w_up-ff_nom_w)/ff_nom_w*100 << "%, syst(dy)= " << (syst_w_up-ff_nom_w)/ff_nom_w*100 << "%, syst(qcd)= " << (syst_qcd_up-ff_nom_qcd)/ff_nom_qcd*100 << "%" <<  endl;
+  cout << "Uncertainties on fake factors: " << endl;
+  cout << "stat(tt)= " << (stat_tt_up-ff_nom_tt)/ff_nom_tt*100 << "%, stat(w)= " << (stat_w_up-ff_nom_w)/ff_nom_w*100 << "%, stat(dy)= " << (stat_w_up-ff_nom_w)/ff_nom_w*100 << "%, stat(qcd)= " << (stat_qcd_up-ff_nom_qcd)/ff_nom_qcd*100 << "%" << endl;
 
 
-    //wrappers
-    WrapperTH2F* wFakeFactorW    = new WrapperTH2F(*fakeFactorW, "FF_W");
-    WrapperTH2F* wFakeFactorQCD  = new WrapperTH2F(*fakeFactorQCD, "FF_QCD");
-    WrapperTGraph* wMtCorrection = new WrapperTGraph(*mtCorrection, "MT_Corr");
-    WrapperTH2F* wFractionW      = new WrapperTH2F(*fractionW, "f_W");
-    WrapperTH2F* wFractionQCD    = new WrapperTH2F(*fractionQCD, "f_QCD");
-    WrapperTH2F* wFractionTT     = new WrapperTH2F(*fractionTT, "f_TT");
-    WrapperTH2F* wFractionVV     = new WrapperTH2F(*fractionVV, "f_VV");
-    WrapperTH2F* wFractionZJ     = new WrapperTH2F(*fractionZJ, "f_ZJ");
-
-    // formulas
-    TFormula mtCorr("mtCorr", "x[0]*x[1]");
-    WrapperTFormula* wFakeFactorWCorr = new WrapperTFormula(mtCorr, "FF_WCorr");
-
-    TFormula combination("combination", "x[0]*x[2]+x[1]*(x[3]+x[4]+x[5]+x[6])");
-    WrapperTFormula* wFakeFactorComb = new WrapperTFormula(combination, "FF_Comb");
-
-    // fake factor
-    // tau_pt = 0
-    // tau_decay = 1
-    // mt = 2
-    // mvis = 3
-    FakeFactor* factor = new FakeFactor();
-    factor->addNode(wFakeFactorW, {}, {0,1});
-    factor->addNode(wFakeFactorQCD, {}, {0,1});
-    factor->addNode(wMtCorrection, {}, {2});
-    factor->addNode(wFractionW, {}, {3,2});
-    factor->addNode(wFractionQCD, {}, {3,2});
-    factor->addNode(wFractionTT, {}, {3,2});
-    factor->addNode(wFractionVV, {}, {3,2});
-    factor->addNode(wFractionZJ, {}, {3,2});
-    factor->addNode(wFakeFactorWCorr, {0,2}, {});
-    factor->addNode(wFakeFactorComb, {1,8,4,3,5,6,7}, {});
-
-    TFile* file = TFile::Open("test.root", "recreate");
-    file->WriteObject(factor, "ff");
-    file->Close();
-    std::cout<<"Done\n";
+  delete ff;
+  delete ff_tt;
+  delete ff_w;
+  delete ff_qcd;
+  ff_file->Close();
 
 }
