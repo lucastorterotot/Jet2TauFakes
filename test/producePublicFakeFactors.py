@@ -4,7 +4,7 @@ import os
 
 ## Meta-data
 version = '20160913'
-channel= 'mt'
+channel= 'et'
 category = "incl"
 tag     = 'v0.2.1'
 
@@ -24,8 +24,7 @@ home = os.getenv('HOME')
 
 qcd_os = Node(
     name='ff_qcd_os',
-    formula='{isocorr_qcd}*{mviscorr_qcd}*{ff_raw_qcd}*{OSSS_corr_qcd}', # SS -> OS correction = 1.23
-    #formula='{isocorr_qcd}*{mviscorr_qcd}*{ff_raw_qcd}',
+    formula='{isocorr_qcd}*{mviscorr_qcd}*{ff_raw_qcd}*{OSSS_corr_qcd}', 
     leaves=[
         Leaf(
             name='ff_raw_qcd',
@@ -53,26 +52,6 @@ qcd_os = Node(
         )
     ]
 )
-
-frac_qcd = replace_nodes(
-    qcd_os,
-    {'ff_qcd_os':
-     Node(
-         name='fracQCD',
-         formula='{frac_qcd}+0*{ff_qcd_os}',
-         leaves=[
-             Leaf(
-                 name='frac_qcd',
-                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/frac_qcd.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
-                 object='h_w_2d',
-                 vars=['mt','tau_decay']
-             ),
-             qcd_os.find('ff_qcd_os')
-         ]
-     )
-    }
-)
-
 qcd_os_up = replace_nodes(
     qcd_os, 
     {'ff_qcd_os':
@@ -109,8 +88,6 @@ qcd_os_down = replace_nodes(
      )
     }
 )
-
-
 qcd_os_up_stat = replace_nodes(
     qcd_os, 
     {'ff_qcd_os':
@@ -176,45 +153,6 @@ w = Node(
         )
     ]
 )
-
-frac_w = replace_nodes(
-    w,
-    {'ff_w':
-     Node(
-         name='fracW',
-         formula='{frac_w}+0*{ff_w}',
-         leaves=[
-             Leaf(
-                 name='frac_w',
-                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/frac_wjets.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
-                 object='h_w_2d',
-                 vars=['mt','tau_decay']
-             ),
-             w.find('ff_w')
-         ]
-     )
-    }
-)
-
-frac_dy = replace_nodes(
-    w,
-    {'ff_w':
-     Node(
-         name='fracDY',
-         formula='{frac_dy}+0*{ff_w}',
-         leaves=[
-             Leaf(
-                 name='frac_dy',
-                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/frac_dy.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
-                 object='h_w_2d',
-                 vars=['mt','tau_decay']
-             ),
-             w.find('ff_w')
-         ]
-     )
-    }
-)
-
 w_up = replace_nodes(
     w, 
     {'ff_w':
@@ -309,26 +247,6 @@ tt = Node(
             ),
         ]
 )
-
-frac_tt = replace_nodes(
-    tt,
-    {'ff_tt':
-     Node(
-         name='fracTT',
-         formula='{frac_tt}+0*{ff_tt}',
-         leaves=[
-             Leaf(
-                 name='frac_tt',
-                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/frac_tt.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
-                 object='h_w_2d',
-                 vars=['mt','tau_decay']
-             ),
-             tt.find('ff_tt')
-         ]
-     )
-    }
-)
-
 tt_up = Node(
          name='ff_tt_up',
          formula='(1.+{sys_tt})*{ff_tt}',
@@ -412,15 +330,222 @@ comb = Node(
     ]
 )
 
+comb_qcd_up = replace_nodes(
+    comb,
+    {'ff_qcd_os':
+         Node(
+             name='ff_qcd_os_up',
+             formula='(1.+{sys_qcd_up})*{ff_qcd_os}',
+             leaves=[
+                 Leaf(
+                     name='sys_qcd_up',
+                     file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/uncertainties_QCD_W.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                     object='uncertainties_QCD_MVis_Iso_SS2OS_up',
+                     vars=['mvis', 'mu_iso']
+                 ),
+                 comb.find('ff_qcd_os')
+             ]
+         )
+    }
+)
+comb_qcd_down = replace_nodes(
+    comb,
+    {'ff_qcd_os':
+         Node(
+             name='ff_qcd_os_down',
+             formula='max(0.,1.-{sys_qcd_down})*{ff_qcd_os}',
+             leaves=[
+                 Leaf(
+                     name='sys_qcd_down',
+                     file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/uncertainties_QCD_W.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                     object='uncertainties_QCD_MVis_Iso_SS2OS_down',
+                     vars=['mvis', 'mu_iso']
+                 ),
+                 comb.find('ff_qcd_os')
+             ]
+         )
+    }
+)
+comb_qcd_up_stat = replace_nodes(
+    comb, 
+    {'ff_qcd_os':
+     Node(
+         name='ff_qcd_os_up_stat',
+         formula='(1.+{stat_qcd_up})*{ff_qcd_os}',
+         leaves=[
+             Leaf(
+                 name='stat_qcd_up',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/FakeFactors_Data_QCD_3D.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                 object='FakeFactors_Data_QCDSS_3D_SS_Iso_Medium_SS_InvertIso_Medium_tau_pt_vs_decayMode_error',
+                 vars=['tau_pt','tau_decay','njets']
+             ),
+             qcd_os.find('ff_qcd_os')
+         ]
+     )
+    }
+)
+comb_qcd_down_stat = replace_nodes(
+    comb, 
+    {'ff_qcd_os':
+     Node(
+         name='ff_qcd_os_down_stat',
+         formula='max(0.,1.-{stat_qcd_down})*{ff_qcd_os}',
+         leaves=[
+             Leaf(
+                 name='stat_qcd_down',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/FakeFactors_Data_QCD_3D.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                 object='FakeFactors_Data_QCDSS_3D_SS_Iso_Medium_SS_InvertIso_Medium_tau_pt_vs_decayMode_error',
+                 vars=['tau_pt','tau_decay','njets']
+             ),
+             qcd_os.find('ff_qcd_os')
+         ]
+     )
+    }
+)
+comb_w_up = replace_nodes(
+    comb,
+    {'ff_w':
+     Node(
+         name='ff_w_up',
+         formula='(1.+{sys_w_up})*{ff_w}',
+         leaves=[
+             Leaf(
+                 name='sys_w_up',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/uncertainties_QCD_W.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                 object='uncertainties_W_MVis_MT_up',
+                 vars=['mvis', 'mt']
+             ),
+             comb.find('ff_w')
+         ]
+     )
+    }
+)
+comb_w_down = replace_nodes(
+    comb,
+    {'ff_w':
+     Node(
+         name='ff_w_down',
+         formula='max(0.,1.-{sys_w_down})*{ff_w}',
+         leaves=[
+             Leaf(
+                 name='sys_w_down',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/uncertainties_QCD_W.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                 object='uncertainties_W_MVis_MT_down',
+                 vars=['mvis', 'mt']
+             ),
+             comb.find('ff_w')
+         ]
+     )
+    }
+)
+comb_w_up_stat = replace_nodes(
+    comb, 
+    {'ff_w':
+     Node(
+         name='ff_w_up_stat',
+         formula='(1.+{stat_w_up})*{ff_w}',
+         leaves=[
+             Leaf(
+                 name='stat_w_up',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/FakeFactors_Data_W_3D.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                 object='FakeFactors_Data_HighMT_3D_Iso_Medium_InvertIso_Medium_tau_pt_vs_decayMode_error',
+                 vars=['tau_pt','tau_decay','njets']
+             ),
+             comb.find('ff_w')
+         ]
+     )
+    }
+)
+comb_w_down_stat = replace_nodes(
+    comb, 
+    {'ff_w':
+     Node(
+         name='ff_w_down_stat',
+         formula='max(0.,1.-{stat_w_down})*{ff_w}',
+         leaves=[
+             Leaf(
+                 name='stat_w_down',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/FakeFactors_Data_W_3D.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                 object='FakeFactors_Data_HighMT_3D_Iso_Medium_InvertIso_Medium_tau_pt_vs_decayMode_error',
+                 vars=['tau_pt','tau_decay','njets']
+             ),
+             comb.find('ff_w')
+         ]
+     )
+    }
+)
+comb_tt_up = replace_nodes(
+    comb,
+    {'ff_tt':
+     Node(
+         name='ff_tt_up',
+         formula='(1.+{sys_tt})*{ff_tt}',
+         leaves=[
+             Leaf(
+                 name='sys_tt',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/sys_smooth_tt_nonclosure_mvis.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                 object='sys_smoothed',
+                 vars=['mvis']
+             ),
+             comb.find('ff_tt')
+         ]
+     )
+    }
+)
+comb_tt_down = replace_nodes(
+    comb,
+    {'ff_tt':
+     Node(
+         name='ff_tt_down',
+         formula='max(0.,1.-{sys_tt})*{ff_tt}',
+         leaves=[
+             comb_tt_up.find('sys_tt'),
+             comb.find('ff_tt')
+         ]
+     )
+    }
+)
+comb_tt_up_stat = replace_nodes(
+    comb,
+    {'ff_tt':
+     Node(
+         name='ff_tt_up_stat',
+         formula='(1.+{stat_tt})*{ff_tt}',
+         leaves=[
+             Leaf(
+                 name='stat_tt',
+                 file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/toyerr_smooth_tt_mvis.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                 object='hh_t_mvis_smoothed',
+                 vars=['mvis']
+             ),
+             comb.find('ff_tt')
+         ]
+     )
+    }
+)
+comb_tt_down_stat = replace_nodes(
+    comb,
+    {'ff_tt':
+     Node(
+         name='ff_tt_down_stat',
+         formula='max(0.,1.-{stat_tt})*{ff_tt}',
+         leaves=[
+             comb_tt_up_stat.find('stat_tt'),
+             comb.find('ff_tt')
+         ]
+     )
+    }
+)
+
+
+
+
 fill(ff_qcd_os, qcd_os)
 fill(ff_qcd_os, qcd_os_up,   sys='ff_qcd_syst_up')
 fill(ff_qcd_os, qcd_os_down, sys='ff_qcd_syst_down')
 fill(ff_qcd_os, qcd_os_up_stat,   sys='ff_qcd_stat_up')
 fill(ff_qcd_os, qcd_os_down_stat, sys='ff_qcd_stat_down')
-fill(ff_qcd_os, frac_qcd, sys='frac_qcd')
 fill(ff_w     , w)
-fill(ff_w, frac_w, sys='frac_w')
-fill(ff_w, frac_dy, sys='frac_dy')
 fill(ff_w, w_up,   sys='ff_w_syst_up')
 fill(ff_w, w_down, sys='ff_w_syst_down')
 fill(ff_w, w_up_stat,   sys='ff_w_stat_up')
@@ -430,8 +555,21 @@ fill(ff_tt, tt_up,   sys='ff_tt_syst_up')
 fill(ff_tt, tt_down, sys='ff_tt_syst_down')
 fill(ff_tt, tt_up_stat,   sys='ff_tt_stat_up')
 fill(ff_tt, tt_down_stat, sys='ff_tt_stat_down')
-fill(ff_tt, frac_tt, sys='frac_tt')
 fill(ff_comb  , comb)
+fill(ff_comb, comb_qcd_up,   sys='ff_qcd_syst_up')
+fill(ff_comb, comb_qcd_down,   sys='ff_qcd_syst_down')
+fill(ff_comb, comb_qcd_up_stat,   sys='ff_qcd_stat_up')
+fill(ff_comb, comb_qcd_down_stat,   sys='ff_qcd_stat_down')
+fill(ff_comb, comb_w_up,   sys='ff_w_syst_up')
+fill(ff_comb, comb_w_down,   sys='ff_w_syst_down')
+fill(ff_comb, comb_w_up_stat,   sys='ff_w_stat_up')
+fill(ff_comb, comb_w_down_stat,   sys='ff_w_stat_down')
+fill(ff_comb, comb_tt_up,   sys='ff_tt_syst_up')
+fill(ff_comb, comb_tt_down, sys='ff_tt_syst_down')
+fill(ff_comb, comb_tt_up_stat,   sys='ff_tt_stat_up')
+fill(ff_comb, comb_tt_down_stat, sys='ff_tt_stat_down')
+
+
 
 file = ROOT.TFile.Open("{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/fakeFactors_{VERSION}.root".format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category), "recreate")
 # Write meta-data
