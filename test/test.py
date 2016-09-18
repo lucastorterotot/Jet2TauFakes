@@ -1,7 +1,7 @@
 import ROOT
 from array import array
 
-ff_fname="/afs/cern.ch/user/j/jbrandst/public/Htautau/FakeRate/20160913/mt/incl/fakeFactors_20160913.root"
+ff_fname="/afs/cern.ch/user/j/jbrandst/public/Htautau/FakeRate/20160913/mt/incl/fakeFactors_20160914.root"
 
 #Retrieve the fake factor
 ff_file = ROOT.TFile.Open(ff_fname)
