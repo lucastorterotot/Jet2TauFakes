@@ -4,7 +4,7 @@ import os
 
 #Meta-data
 version='20161023'
-tag='v0.3.0'
+tag='v0.2.1'
 channels=["mt","et"]
 categories = ['_0jetLow','_0jetHigh','_1jetLow','_1jetHigh','_vbfLow','_vbfHigh','_2jet','_anyb']
 
