@@ -1,6 +1,6 @@
 #include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
 
-void test(TString fname="/afs/cern.ch/user/j/jbrandst/public/Htautau/FakeRate/20160914/mt/incl/fakeFactors_20160914.root"){
+void test(TString fname="/afs/cern.ch/user/j/jbrandst/public/Htautau/FakeRate/2016/201610/mt/incl/fakeFactors_20161023.root"){
 
   // Retrieve the fake factor
   TFile* ff_file = TFile::Open(fname);
