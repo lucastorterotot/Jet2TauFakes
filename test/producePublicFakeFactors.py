@@ -3,10 +3,10 @@ import ROOT
 import os
 
 #Meta-data
-version='20160914'
-tag='v0.2.1'
+version='20161023'
+tag='v0.3.0'
 channels=["mt","et"]
-categories = ['incl','_0jet','_1jet','_1jetZ050','_1jetZ50100','_1jetZ100','_2jet','_2jetVBF','_anyb']
+categories = ['_0jetLow','_0jetHigh','_1jetLow','_1jetHigh','_vbfLow','_vbfHigh','_2jet','_anyb']
 
 for channel in channels:
     for category in categories:
@@ -230,8 +230,7 @@ for channel in channels:
              )
             }
         )
-        
-        
+
         ###########################################################################################################
         ### TTbar fake factors
         tt = Node(
@@ -240,63 +239,91 @@ for channel in channels:
             leaves=[
                 Leaf(
                     name='ff_raw_tt',
-                    file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/ff_tt_3D.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
-                    object='c_t_3d',
+                    file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/FakeFactors_Data_TT_3D.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                    object='FakeFactors_Data_TT_anyb_addLep_InvertIso_tau_pt_vs_decayMode',
                     vars=['tau_pt','tau_decay','njets']
                 ),
                 Leaf(
                     name='mviscorr_tt',
-                    file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/corr_smooth_tt_mvis.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
-                    object='corr_smoothed',
+                    file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/Correction_MC_TT_MVis.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                    object='TT_OS_MC_mvis_correction',
                     vars=['mvis']
                 ),
             ]
+        )        
+        tt_up = replace_nodes(
+            tt,
+            {'ff_tt':
+             Node(
+                 name='ff_tt_up',
+                 formula='(1.+{sys_tt_up})*{ff_tt}',
+                 leaves=[
+                     Leaf(
+                         name='sys_tt_up',
+                         file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/uncertainties_TT.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                         object='uncertainties_TT_MVis_up',
+                         vars=['tau_decay','mvis']
+                     ),
+                     tt.find('ff_tt')
+                 ]
+             )
+            }
         )
-        tt_up = Node(
-            name='ff_tt_up',
-            formula='(1.+{sys_tt})*{ff_tt}',
-            leaves=[
-                Leaf(
-                    name='sys_tt',
-                    file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/sys_smooth_tt_nonclosure_mvis.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
-                    object='sys_smoothed',
-                    vars=['mvis']
-                ),
-                tt.find('ff_tt')
-            ]
+        tt_down = replace_nodes(
+            tt,
+            {'ff_tt':
+             Node(
+                 name='ff_tt_down',
+                 formula='max(0.,1.-{sys_tt_down})*{ff_tt}',
+                 leaves=[
+                     Leaf(
+                         name='sys_tt_down',
+                         file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/uncertainties_TT.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                         object='uncertainties_TT_MVis_down',
+                         vars=['tau_decay','mvis']
+                     ),
+                     tt.find('ff_tt')
+                 ]
+             )
+            }
         )
-        tt_down = Node(
-            name='ff_tt_down',
-            formula='max(0.,1.-{sys_tt})*{ff_tt}',
-            leaves=[
-                tt_up.find('sys_tt'),
-                tt.find('ff_tt')
-            ]
+        tt_up_stat = replace_nodes(
+            tt, 
+            {'ff_tt':
+             Node(
+                 name='ff_tt_up_stat',
+                 formula='(1.+{stat_tt_up})*{ff_tt}',
+                 leaves=[
+                     Leaf(
+                         name='stat_tt_up',
+                         file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/FakeFactors_Data_TT_3D.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                         object='FakeFactors_Data_TT_anyb_addLep_InvertIso_tau_pt_vs_decayMode_error',
+                         vars=['tau_pt','tau_decay','njets']
+                     ),
+                     tt.find('ff_tt')
+                 ]
+             )
+            }
         )
-        
-        tt_up_stat = Node(
-            name='ff_tt_up_stat',
-            formula='(1.+{stat_tt})*{ff_tt}',
-            leaves=[
-                Leaf(
-                    name='stat_tt',
-                    file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/toyerr_smooth_tt_mvis.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
-                    object='hh_t_mvis_smoothed',
-                    vars=['mvis']
-                ),
-                tt.find('ff_tt')
-            ]
+        tt_down_stat = replace_nodes(
+            tt, 
+            {'ff_tt':
+             Node(
+                 name='ff_tt_down_stat',
+                 formula='max(0.,1.-{stat_tt_down})*{ff_tt}',
+                 leaves=[
+                     Leaf(
+                         name='stat_tt_down',
+                         file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/FakeFactors_Data_TT_3D.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                         object='FakeFactors_Data_TT_anyb_addLep_InvertIso_tau_pt_vs_decayMode_error',
+                         vars=['tau_pt','tau_decay','njets']
+                     ),
+                     tt.find('ff_tt')
+                 ]
+             )
+            }
         )
-        tt_down_stat = Node(
-            name='ff_tt_down_stat',
-            formula='max(0.,1.-{stat_tt})*{ff_tt}',
-            leaves=[
-                tt_up_stat.find('stat_tt'),
-                tt.find('ff_tt')
-            ]
-        )
-        
-        
+                
         ###########################################################################################################
         ### Combined fake factors
         comb = Node(
@@ -484,13 +511,13 @@ for channel in channels:
             {'ff_tt':
              Node(
                  name='ff_tt_up',
-                 formula='(1.+{sys_tt})*{ff_tt}',
+                 formula='(1.+{sys_tt_up})*{ff_tt}',
                  leaves=[
                      Leaf(
-                         name='sys_tt',
-                         file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/sys_smooth_tt_nonclosure_mvis.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
-                         object='sys_smoothed',
-                         vars=['mvis']
+                         name='sys_tt_up',
+                         file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/uncertainties_TT.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                         object='uncertainties_TT_MVis_up',
+                         vars=['tau_decay','mvis']
                      ),
                      comb.find('ff_tt')
                  ]
@@ -502,41 +529,51 @@ for channel in channels:
             {'ff_tt':
              Node(
                  name='ff_tt_down',
-                 formula='max(0.,1.-{sys_tt})*{ff_tt}',
-                 leaves=[
-                     comb_tt_up.find('sys_tt'),
-                     comb.find('ff_tt')
-                 ]
-             )
-            }
-        )
-        comb_tt_up_stat = replace_nodes(
-            comb,
-            {'ff_tt':
-             Node(
-                 name='ff_tt_up_stat',
-                 formula='(1.+{stat_tt})*{ff_tt}',
+                 formula='max(0.,1.-{sys_tt_down})*{ff_tt}',
                  leaves=[
                      Leaf(
-                         name='stat_tt',
-                         file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/toyerr_smooth_tt_mvis.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
-                         object='hh_t_mvis_smoothed',
-                         vars=['mvis']
+                         name='sys_tt_down',
+                         file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/uncertainties_TT.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                         object='uncertainties_TT_MVis_down',
+                         vars=['tau_decay','mvis']
                      ),
                      comb.find('ff_tt')
                  ]
              )
             }
         )
+        comb_tt_up_stat = replace_nodes(
+            comb, 
+            {'ff_tt':
+             Node(
+                 name='ff_tt_up_stat',
+                 formula='(1.+{stat_tt_up})*{ff_tt}',
+                 leaves=[
+                     Leaf(
+                         name='stat_tt_up',
+                         file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/FakeFactors_Data_TT_3D.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                         object='FakeFactors_Data_TT_anyb_addLep_InvertIso_tau_pt_vs_decayMode_error',
+                         vars=['tau_pt','tau_decay','njets']
+                     ),
+                     tt.find('ff_tt')
+                 ]
+             )
+            }
+        )
         comb_tt_down_stat = replace_nodes(
-            comb,
+            comb, 
             {'ff_tt':
              Node(
                  name='ff_tt_down_stat',
-                 formula='max(0.,1.-{stat_tt})*{ff_tt}',
+                 formula='max(0.,1.-{stat_tt_down})*{ff_tt}',
                  leaves=[
-                     comb_tt_up_stat.find('stat_tt'),
-                     comb.find('ff_tt')
+                     Leaf(
+                         name='stat_tt_down',
+                         file='{HOME}/public/Htautau/FakeRate/{VERSION}/{CHANNEL}/{CATEGORY}/pieces/FakeFactors_Data_TT_3D.root'.format(HOME=home,VERSION=version,CHANNEL=channel,CATEGORY=category),
+                         object='FakeFactors_Data_TT_anyb_addLep_InvertIso_tau_pt_vs_decayMode_error',
+                         vars=['tau_pt','tau_decay','njets']
+                     ),
+                     tt.find('ff_tt')
                  ]
              )
             }
