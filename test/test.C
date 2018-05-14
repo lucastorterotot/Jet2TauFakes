@@ -1,19 +1,23 @@
 #include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
 
-void test(TString fname="/afs/cern.ch/user/j/jbrandst/public/Htautau/FakeRate/2016/201610/mt/incl/fakeFactors_20161023.root"){
+void test(TString fname="/afs/cern.ch/user/m/mspanrin/public/Htautau/FakeRate/et/incl/fakeFactors_20180412_tight.root"){
 
   // Retrieve the fake factor
   TFile* ff_file = TFile::Open(fname);
   FakeFactor* ff    = (FakeFactor*)ff_file->Get("ff_comb");
 
   // Fill inputs
-  std::vector<double> inputs(6);
+  std::vector<string> inputNames( ff->inputs() ) ;
+  std::vector<double> inputs( inputNames.size() );
   inputs[0] = 30; //tau_pt;
   inputs[1] = 0;  //tau_decayMode;
   inputs[2] = 1;  //njet
   inputs[3] = 40; //mvis;
   inputs[4] = 10; //mt;
   inputs[5] = 0.00; //muon_iso;
+  inputs[6] = 0.4;  //frac_qcd
+  inputs[7] = 0.3;  //frac_w
+  inputs[8] = 0.2;  //frac_tt
 
   // Retrieve fake factors
   double ff_nom = ff->value(inputs); // nominal fake factor
@@ -32,8 +36,10 @@ void test(TString fname="/afs/cern.ch/user/j/jbrandst/public/Htautau/FakeRate/20
   double stat_tt_up = ff->value(inputs, "ff_tt_stat_up");
   double stat_tt_down = ff->value(inputs, "ff_tt_stat_down");
   
-  cout << "pt= " << inputs[0] << "\t dm= " << inputs[1] << "\t njet= " << inputs[2] << "\t mvis= " << inputs[3] << "\t mt= " << inputs[4] << "\t muiso= " << inputs[5] << endl;
-  cout << "ff= " << ff_nom << endl;
+  for( int i = 0; i < inputNames.size(); i++ ){
+    cout << inputNames[i]<< "= " << inputs[i] << ", ";
+  }
+  cout <<std::endl <<  "ff= " << ff_nom << endl;
   cout << " ----- Systematic uncertainties ----- " << endl;
   cout << "Uncertainties on corrections: " << endl;
   cout << "syst(tt)= " << (syst_tt_up-ff_nom)/ff_nom << "%, syst(w+dy)= " << (syst_w_up-ff_nom)/ff_nom*100 << "%, syst(qcd)= " << (syst_qcd_up-ff_nom)/ff_nom*100 << "%" <<  endl;
