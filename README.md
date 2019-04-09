@@ -3,6 +3,8 @@ This has been tested on CMSSW_7_6_3
 
 `git clone https://github.com/CMS-HTT/Jet2TauFakes.git HTTutilities/Jet2TauFakes`  
 `scram b -j4`   
+Add data file :
+`git clone data ssh://git@gitlab.cern.ch:7999/cms-htt/Jet2TauFakesFiles.git`
 
 # Tests
 `cd HTTutilities/Jet2TauFakes/test`   
