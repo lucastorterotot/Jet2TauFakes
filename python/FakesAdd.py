@@ -68,13 +68,9 @@ fake_factor_fcts_channel = {
     'mt' : fake_factor_mt,
     'et' : fake_factor_et
 }
-
+    
 def FakesAdd(oldfilename, systematics=False, channel='tt'):
     fake_factor_fct = fake_factor_fcts_channel[channel]
-    if channel == 'tt':
-        l1_decay_mode = 'l1_decay_mode'
-    else :
-        l1_decay_mode = 'l2_decay_mode' # for semileptonic channels seems OK but what for ee, em, mm channels ?
         
     inclfile = ROOT.TFile('$CMSSW_BASE/src/HTTutilities/Jet2TauFakes/data/SM2017/tight/vloose/'+channel+'/fakeFactors.root')
     inclff = inclfile.Get('ff_comb')
@@ -87,23 +83,27 @@ def FakesAdd(oldfilename, systematics=False, channel='tt'):
     oldtree = oldfile.Get('events')
     f = ROOT.TFile(oldfilename.replace('.root','_fakes.root'),'recreate')
     tree = oldtree.CloneTree(0)
-    l1_fakeweight = array('d',[1.])
-    l1_fakesbranch = tree.Branch('l1_fakeweight',l1_fakeweight,'l1_fakeweight/D')
+    if channel == 'tt':
+        l1_fakeweight = array('d',[1.])
+        l1_fakesbranch = tree.Branch('l1_fakeweight',l1_fakeweight,'l1_fakeweight/D')
     l2_fakeweight = array('d',[1.])
     l2_fakesbranch = tree.Branch('l2_fakeweight',l2_fakeweight,'l2_fakeweight/D')
     if systematics:
-        l1_fakeweight_up = array('d',[1.])
-        l1_fakesbranch_up = tree.Branch('l1_fakeweight_up',l1_fakeweight_up,'l1_fakeweight_up/D')
+        if channel == 'tt':
+            l1_fakeweight_up = array('d',[1.])
+            l1_fakesbranch_up = tree.Branch('l1_fakeweight_up',l1_fakeweight_up,'l1_fakeweight_up/D')
         l2_fakeweight_up = array('d',[1.])
         l2_fakesbranch_up = tree.Branch('l2_fakeweight_up',l2_fakeweight_up,'l2_fakeweight_up/D')
-        l1_fakeweight_down = array('d',[1.])
-        l1_fakesbranch_down = tree.Branch('l1_fakeweight_down',l1_fakeweight_down,'l1_fakeweight_down/D')
+        if channel == 'tt':
+            l1_fakeweight_down = array('d',[1.])
+            l1_fakesbranch_down = tree.Branch('l1_fakeweight_down',l1_fakeweight_down,'l1_fakeweight_down/D')
         l2_fakeweight_down = array('d',[1.])
         l2_fakesbranch_down = tree.Branch('l2_fakeweight_down',l2_fakeweight_down,'l2_fakeweight_down/D')
     for event in oldtree:
-        l1_fakeweight[0] = fake_factor_fct(event.l1_pt,
+        if channel == 'tt':
+            l1_fakeweight[0] = fake_factor_fct(event.l1_pt,
                                                   event.l2_pt,
-                                                  getattr(event, 'l1_decay_mode'),
+                                                  event.l1_decay_mode,
                                                   event.n_jets_pt30,
                                                   event.m_vis, aisoregion=1,ff=inclff, w=w)
         l2_fakeweight[0] = fake_factor_fct(event.l2_pt,
@@ -112,9 +112,10 @@ def FakesAdd(oldfilename, systematics=False, channel='tt'):
                                                   event.n_jets_pt30,
                                                   event.m_vis, aisoregion=2,ff=inclff, w=w)
         if systematics:
-            l1_fakeweight_up[0] = fake_factor_fct(event.l1_pt,
+            if channel == 'tt':
+                l1_fakeweight_up[0] = fake_factor_fct(event.l1_pt,
                                                          event.l2_pt,
-                                                         getattr(event, 'l1_decay_mode'),
+                                                         event.l1_decay_mode,
                                                          event.n_jets_pt30,
                                                          event.m_vis,
                                                          'up', aisoregion=1,ff=inclff, w=w)
@@ -124,9 +125,10 @@ def FakesAdd(oldfilename, systematics=False, channel='tt'):
                                                          event.n_jets_pt30,
                                                          event.m_vis,
                                                          'up', aisoregion=2,ff=inclff, w=w)
-            l1_fakeweight_down[0] = fake_factor_fct(event.l1_pt,
+            if channel == 'tt':
+                l1_fakeweight_down[0] = fake_factor_fct(event.l1_pt,
                                                            event.l2_pt,
-                                                           getattr(event, 'l1_decay_mode'),
+                                                           event.l1_decay_mode,
                                                            event.n_jets_pt30,
                                                            event.m_vis,
                                                            'down', aisoregion=1,ff=inclff, w=w)
