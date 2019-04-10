@@ -43,7 +43,6 @@ def get_FF_inputs(event, channel, leg, w):
         inputs.append(getattr(event, attribute, False))
     for frac in [frac_qcd, frac_w, frac_tt ]:
         inputs.append(frac*renorm_factor)
-    import pdb; pdb.set_trace()
     return inputs
 
 def get_options():
