@@ -2,50 +2,49 @@ import ROOT
 import os
 from array import array
 
-def fake_factor_et(elept, taupt, taudecaymode, njets, mvis, sys='', aisoregion=1, ff=None, w=None):
+def get_event_fake_factor(event, channel, leg=2, sys='', ff=None, w=None):
     '''Interface function to retrieve the fake factors from
-    the rootfile for the ele+tau channel.
+    the rootfile for the given channel.
     
     @param sys : if '' -> nominal value, else can be 'up' or 'down'
     '''
-    return 1.
+    inputs = get_FF_inputs(event, channel, leg, w)
+    if sys:
+        ffval =  ff.value(len(inputs), array('d',inputs),sys)
+    else:
+        ffval = ff.value(len(inputs), array('d',inputs))
+    return ffval
 
-def fake_factor_mt(mupt, taupt, taudecaymode, njets, mvis, sys='', aisoregion=1, ff=None, w=None):
-    '''Interface function to retrieve the fake factors from
-    the rootfile for the muon+tau channel.
-    
-    @param sys : if '' -> nominal value, else can be 'up' or 'down'
-    '''
-    return 1.
+FF_inputs_from_event = {
+    'tt1' : ['l1_pt', 'l2_pt', 'l1_decay_mode', 'n_jets_pt30', 'm_vis'],
+    'tt2' : ['l2_pt', 'l1_pt', 'l2_decay_mode', 'n_jets_pt30', 'mvis'],
+    'mt' : ['l2_pt', 'l2_decay_mode', 'n_jets_pt30', 'm_vis', 'mt_tot', 'l1_iso'],
+    'et' : ['l2_pt', 'l2_decay_mode', 'n_jets_pt30', 'm_vis', 'mt_tot', 'l1_iso']
+}
 
-def fake_factor_fullyhadronic(tau1pt, tau2pt, tau1decaymode, njets, mvis, sys='', aisoregion=1, ff=None, w=None):
-    '''Interface function to retrieve the fake factors from
-    the rootfile for the fully hadronic channel.
-    
-    @param sys : if '' -> nominal value, else can be 'up' or 'down'
-    '''
-    w.var("m_vis").setVal(mvis)
-    w.var("njets").setVal(njets)
-    w.var("aiso").setVal( aisoregion )
+# For tt channel, inputs = [tau_pt, tau2_pt, tau_decayMode, njets, mvis, frac_qcd, frac_w, frac_tt ]
+# For et and mt channels, inputs = [tau_pt, tau_decayMode, njets, mvis, mt, muon_iso, frac_qcd, frac_w, frac_tt]
+# Last 3 fractions, common and in same order for all 4 possibilities, are added later in get_FF_inputs
+
+def get_FF_inputs(event, channel, leg, w):
+    w.var("m_vis").setVal(event.m_vis)
+    w.var("njets").setVal(event.n_jets_pt30)
+    w.var("aiso").setVal( leg )
     frac_qcd = w.function("t_frac_qcd").getVal()
     if frac_qcd < 0.:
         frac_qcd = 0.
     frac_w  = w.function("t_frac_w").getVal()
     frac_tt = w.function("t_frac_tt").getVal()
     renorm_factor = 1./(frac_qcd+frac_w+frac_tt)
-    inputs = [tau1pt,
-              tau2pt, 
-              tau1decaymode, 
-              njets,
-              mvis,
-              frac_qcd*renorm_factor,
-              frac_w*renorm_factor,
-              frac_tt*renorm_factor]
-    if sys:
-        ffval =  ff.value(len(inputs), array('d',inputs),sys)
-    else:
-        ffval = ff.value(len(inputs), array('d',inputs))
-    return ffval
+    inputs = []
+    if channel == 'tt':
+        channel += str(leg)
+    for attribute in FF_inputs_from_event[channel]:
+        inputs.append(getattr(event, attribute, False))
+    for frac in [frac_qcd, frac_w, frac_tt ]:
+        inputs.append(frac*renorm_factor)
+    import pdb; pdb.set_trace()
+    return inputs
 
 def get_options():
     import os
@@ -57,25 +56,17 @@ def get_options():
                       default='tt',
                       help='Channel to process: tt, mt or et')
     parser.add_option("-s", "--systematics", dest = "systematics",
-                      default='False',
+                      default=False,
                       help='Systematics')
     
     (options,args) = parser.parse_args()
     return options, args
-
-fake_factor_fcts_channel = {
-    'tt' : fake_factor_fullyhadronic,
-    'mt' : fake_factor_mt,
-    'et' : fake_factor_et
-}
     
 def FakesAdd(oldfilename, systematics=False, channel='tt'):
-    fake_factor_fct = fake_factor_fcts_channel[channel]
-        
     inclfile = ROOT.TFile('$CMSSW_BASE/src/HTTutilities/Jet2TauFakes/data/SM2017/tight/vloose/'+channel+'/fakeFactors.root')
     inclff = inclfile.Get('ff_comb')
 
-    f = ROOT.TFile("/afs/cern.ch/work/j/jbechtel/public/htt_ff_fractions_2017_incl.xroot")
+    f = ROOT.TFile("/home/cms/torterotot/public/htt_ff_fractions_2017.root")
     w = f.Get("w")
     f.Close()
     
@@ -101,43 +92,15 @@ def FakesAdd(oldfilename, systematics=False, channel='tt'):
         l2_fakesbranch_down = tree.Branch('l2_fakeweight_down',l2_fakeweight_down,'l2_fakeweight_down/D')
     for event in oldtree:
         if channel == 'tt':
-            l1_fakeweight[0] = fake_factor_fct(event.l1_pt,
-                                                  event.l2_pt,
-                                                  event.l1_decay_mode,
-                                                  event.n_jets_pt30,
-                                                  event.m_vis, aisoregion=1,ff=inclff, w=w)
-        l2_fakeweight[0] = fake_factor_fct(event.l2_pt,
-                                                  event.l1_pt,
-                                                  event.l2_decay_mode,
-                                                  event.n_jets_pt30,
-                                                  event.m_vis, aisoregion=2,ff=inclff, w=w)
+            l1_fakeweight[0] = get_event_fake_factor(event, channel=channel, leg=1, ff=inclff, w=w)
+        l2_fakeweight[0] = get_event_fake_factor(event, channel=channel, leg=2, ff=inclff, w=w)
         if systematics:
             if channel == 'tt':
-                l1_fakeweight_up[0] = fake_factor_fct(event.l1_pt,
-                                                         event.l2_pt,
-                                                         event.l1_decay_mode,
-                                                         event.n_jets_pt30,
-                                                         event.m_vis,
-                                                         'up', aisoregion=1,ff=inclff, w=w)
-            l2_fakeweight_up[0] = fake_factor_fct(event.l2_pt,
-                                                         event.l1_pt,
-                                                         event.l2_decay_mode,
-                                                         event.n_jets_pt30,
-                                                         event.m_vis,
-                                                         'up', aisoregion=2,ff=inclff, w=w)
+                l1_fakeweight_up[0] = get_event_fake_factor(event, channel=channel, leg=1, sys='up', ff=inclff, w=w)
+            l2_fakeweight_up[0] = get_event_fake_factor(event, channel=channel, leg=2, sys='up', ff=inclff, w=w)
             if channel == 'tt':
-                l1_fakeweight_down[0] = fake_factor_fct(event.l1_pt,
-                                                           event.l2_pt,
-                                                           event.l1_decay_mode,
-                                                           event.n_jets_pt30,
-                                                           event.m_vis,
-                                                           'down', aisoregion=1,ff=inclff, w=w)
-            l2_fakeweight_down[0] = fake_factor_fct(event.l2_pt,
-                                                           event.l1_pt,
-                                                           event.l2_decay_mode,
-                                                           event.n_jets_pt30,
-                                                           event.m_vis,
-                                                           'down', aisoregion=2,ff=inclff, w=w)
+                l1_fakeweight_down[0] = get_event_fake_factor(event, channel=channel, leg=1, sys='down', ff=inclff, w=w)
+            l2_fakeweight_down[0] = get_event_fake_factor(event, channel=channel, leg=2, sys='down', ff=inclff, w=w)
         tree.Fill()
     tree.Write()
     f.Close()
