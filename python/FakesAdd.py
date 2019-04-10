@@ -1,19 +1,6 @@
 import ROOT
 import os
 from array import array
-from functools import partial
-import multiprocessing as mp
-
-def multithreadmap(f,X,ncores=20, **kwargs):
-    """
-    multithreading map of a function, default on 20 cpu cores.
-    """
-    func = partial(f, **kwargs)
-    p=mp.Pool(ncores)
-    Xout = p.map(func,X)
-    p.terminate()
-    return(Xout)
-
 
 def fake_factor_fullyhadronic(tau1pt, tau2pt, tau1decaymode, njets, mvis, sys='', aisoregion=1, ff=None, w=None):
     '''Interface function to retrieve the fake factors from
@@ -44,7 +31,23 @@ def fake_factor_fullyhadronic(tau1pt, tau2pt, tau1decaymode, njets, mvis, sys=''
         ffval = ff.value(len(inputs), array('d',inputs))
     return ffval
 
-def FakesAdd(oldfilename, systematics=False):
+def get_options():
+    import os
+    import sys
+    from optparse import OptionParser
+    usage = "usage: %prog [options] <src_dir>"
+    parser = OptionParser(usage=usage)
+    parser.add_option("-C", "--channel", dest = "channel",
+                      default='tt',
+                      help='Channel to process: tt, mt or et')
+    parser.add_option("-s", "--systematics", dest = "systematics",
+                      default='False',
+                      help='Systematics')
+    
+    (options,args) = parser.parse_args()
+    return options, args
+
+def FakesAdd(oldfilename, systematics=False, channel='tt'):
 
     inclfile = ROOT.TFile('$CMSSW_BASE/src/HTTutilities/Jet2TauFakes/data/SM2017/tight/vloose/tt/fakeFactors.root')
     inclff = inclfile.Get('ff_comb')
@@ -113,42 +116,6 @@ def FakesAdd(oldfilename, systematics=False):
 
 if __name__ == '__main__':
 
-    
-    files_to_process = ['Embedded2017B_tt',
-                        'Embedded2017C_tt',
-                        'Embedded2017D_tt',
-                        'Embedded2017E_tt',
-                        'Embedded2017F_tt',
-                        # 'TBar_tWch',
-                        # 'TBar_tch',
-                        # 'T_tWch',
-                        # 'T_tch',
-                        # 'WW',
-                        # 'WZ',
-                        # 'ZZ',
-                        # 'DYJetsToLL_M50',
-                        # 'DYJetsToLL_M50_ext',
-                        # 'WJetsToLNu_LO',
-                        # 'WJetsToLNu_LO_ext',
-                        # 'TTHad_pow',
-                        # 'TTSemi_pow',
-                        # 'TTLep_pow',
-                        # 'Tau_Run2017B_31Mar2018',
-                        # 'Tau_Run2017C_31Mar2018',
-                        # 'Tau_Run2017D_31Mar2018',
-                        # 'Tau_Run2017E_31Mar2018',
-                        # 'Tau_Run2017F_31Mar2018',
-                        ]
-    # for f in files_to_process:
-    #     print 'adding fakes to' , f
-    #     FakesAdd('trees/{}/NtupleProducer/tree.root'.format(f))
-    files_to_process = []
-
-    os.system('ls trees/ > trees.out')
-
-    with open('trees.out') as f:
-        for l in f.readlines():
-            files_to_process.append(l[:-1])
-
-    files_to_process = ['trees/{}/tree.root'.format(f) for f in files_to_process]
-    multithreadmap(FakesAdd, files_to_process)
+    options, args = get_options()
+    src = args[0]
+    FakesAdd(src, systematics=options.systematics, channel=options.channel)
