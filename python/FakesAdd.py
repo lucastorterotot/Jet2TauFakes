@@ -17,7 +17,7 @@ def get_event_fake_factor(event, channel, leg=2, sys='', ff=None, w=None):
 
 FF_inputs_from_event = {
     'tt1' : ['l1_pt', 'l2_pt', 'l1_decay_mode', 'n_jets_pt30', 'm_vis'],
-    'tt2' : ['l2_pt', 'l1_pt', 'l2_decay_mode', 'n_jets_pt30', 'mvis'],
+    'tt2' : ['l2_pt', 'l1_pt', 'l2_decay_mode', 'n_jets_pt30', 'm_vis'],
     'mt' : ['l2_pt', 'l2_decay_mode', 'n_jets_pt30', 'm_vis', 'mt_tot', 'l1_iso'],
     'et' : ['l2_pt', 'l2_decay_mode', 'n_jets_pt30', 'm_vis', 'mt_tot', 'l1_iso']
 }
