@@ -2,6 +2,22 @@ import ROOT
 import os
 from array import array
 
+def fake_factor_et(elept, taupt, taudecaymode, njets, mvis, sys='', aisoregion=1, ff=None, w=None):
+    '''Interface function to retrieve the fake factors from
+    the rootfile for the ele+tau channel.
+    
+    @param sys : if '' -> nominal value, else can be 'up' or 'down'
+    '''
+    return 1.
+
+def fake_factor_mt(mupt, taupt, taudecaymode, njets, mvis, sys='', aisoregion=1, ff=None, w=None):
+    '''Interface function to retrieve the fake factors from
+    the rootfile for the muon+tau channel.
+    
+    @param sys : if '' -> nominal value, else can be 'up' or 'down'
+    '''
+    return 1.
+
 def fake_factor_fullyhadronic(tau1pt, tau2pt, tau1decaymode, njets, mvis, sys='', aisoregion=1, ff=None, w=None):
     '''Interface function to retrieve the fake factors from
     the rootfile for the fully hadronic channel.
@@ -47,9 +63,20 @@ def get_options():
     (options,args) = parser.parse_args()
     return options, args
 
-def FakesAdd(oldfilename, systematics=False, channel='tt'):
+fake_factor_fcts_channel = {
+    'tt' : fake_factor_fullyhadronic,
+    'mt' : fake_factor_mt,
+    'et' : fake_factor_et
+}
 
-    inclfile = ROOT.TFile('$CMSSW_BASE/src/HTTutilities/Jet2TauFakes/data/SM2017/tight/vloose/tt/fakeFactors.root')
+def FakesAdd(oldfilename, systematics=False, channel='tt'):
+    fake_factor_fct = fake_factor_fcts_channel[channel]
+    if channel == 'tt':
+        l1_decay_mode = 'l1_decay_mode'
+    else :
+        l1_decay_mode = 'l2_decay_mode' # for semileptonic channels seems OK but what for ee, em, mm channels ?
+        
+    inclfile = ROOT.TFile('$CMSSW_BASE/src/HTTutilities/Jet2TauFakes/data/SM2017/tight/vloose/'+channel+'/fakeFactors.root')
     inclff = inclfile.Get('ff_comb')
 
     f = ROOT.TFile("/afs/cern.ch/work/j/jbechtel/public/htt_ff_fractions_2017_incl.xroot")
@@ -74,36 +101,36 @@ def FakesAdd(oldfilename, systematics=False, channel='tt'):
         l2_fakeweight_down = array('d',[1.])
         l2_fakesbranch_down = tree.Branch('l2_fakeweight_down',l2_fakeweight_down,'l2_fakeweight_down/D')
     for event in oldtree:
-        l1_fakeweight[0] = fake_factor_fullyhadronic(event.l1_pt,
+        l1_fakeweight[0] = fake_factor_fct(event.l1_pt,
                                                   event.l2_pt,
-                                                  event.l1_decay_mode,
+                                                  getattr(event, 'l1_decay_mode'),
                                                   event.n_jets_pt30,
                                                   event.m_vis, aisoregion=1,ff=inclff, w=w)
-        l2_fakeweight[0] = fake_factor_fullyhadronic(event.l2_pt,
+        l2_fakeweight[0] = fake_factor_fct(event.l2_pt,
                                                   event.l1_pt,
                                                   event.l2_decay_mode,
                                                   event.n_jets_pt30,
                                                   event.m_vis, aisoregion=2,ff=inclff, w=w)
         if systematics:
-            l1_fakeweight_up[0] = fake_factor_fullyhadronic(event.l1_pt,
+            l1_fakeweight_up[0] = fake_factor_fct(event.l1_pt,
                                                          event.l2_pt,
-                                                         event.l1_decay_mode,
+                                                         getattr(event, 'l1_decay_mode'),
                                                          event.n_jets_pt30,
                                                          event.m_vis,
                                                          'up', aisoregion=1,ff=inclff, w=w)
-            l2_fakeweight_up[0] = fake_factor_fullyhadronic(event.l2_pt,
+            l2_fakeweight_up[0] = fake_factor_fct(event.l2_pt,
                                                          event.l1_pt,
                                                          event.l2_decay_mode,
                                                          event.n_jets_pt30,
                                                          event.m_vis,
                                                          'up', aisoregion=2,ff=inclff, w=w)
-            l1_fakeweight_down[0] = fake_factor_fullyhadronic(event.l1_pt,
+            l1_fakeweight_down[0] = fake_factor_fct(event.l1_pt,
                                                            event.l2_pt,
-                                                           event.l1_decay_mode,
+                                                           getattr(event, 'l1_decay_mode'),
                                                            event.n_jets_pt30,
                                                            event.m_vis,
                                                            'down', aisoregion=1,ff=inclff, w=w)
-            l2_fakeweight_down[0] = fake_factor_fullyhadronic(event.l2_pt,
+            l2_fakeweight_down[0] = fake_factor_fct(event.l2_pt,
                                                            event.l1_pt,
                                                            event.l2_decay_mode,
                                                            event.n_jets_pt30,
