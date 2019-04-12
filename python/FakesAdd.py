@@ -39,11 +39,14 @@ def get_FF_inputs(event, channel, leg, w):
     inputs = []
     if channel == 'tt':
         channel += str(leg)
-    for attribute in FF_inputs_from_event[channel]:
-        inputs.append(getattr(event, attribute, False))
-    for frac in [frac_qcd, frac_w, frac_tt ]:
-        inputs.append(frac*renorm_factor)
-    return inputs
+    if not all([hasattr(event, attribute) for attribute in FF_inputs_from_event[channel]]):
+        raise AttributeError('Please check that events have these attributes:\n   {}'.format(FF_inputs_from_event[channel]))
+    else:
+        for attribute in FF_inputs_from_event[channel]:
+            inputs.append(getattr(event, attribute))
+        for frac in [frac_qcd, frac_w, frac_tt ]:
+            inputs.append(frac*renorm_factor)
+        return inputs
 
 def get_options():
     import os
