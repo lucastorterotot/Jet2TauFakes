@@ -45,11 +45,14 @@ os.system('ls {} | grep {} > files.out'.format(options.source_dir, options.cut_o
 files_to_process = []
 with open('files.out') as f:
     for l in f.readlines():
-        file_to_process = os.popen('find {} -type f -name tree.root'.format(options.source_dir+'/'+l)).read()[:-1]
-        files_to_process.append(file_to_process)
+        command = 'find '+options.source_dir+'/'+l[:-1]+'/'+' -type f -name tree.root'
+        files_to_add = os.popen(command).read()[:-1].split('\n')
+        files_to_process += files_to_add
 os.system('rm files.out')
 
 print ''
+for tree in files_to_process:
+    print tree
 start_add_FF = None
 while start_add_FF not in ['y','n']:
     start_add_FF = raw_input('Add FF to this trees? [y/n]')
