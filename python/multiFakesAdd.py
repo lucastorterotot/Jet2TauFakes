@@ -16,7 +16,7 @@ def get_options():
                       default='tt',
                       help='Channel to process: tt, mt or et')
     parser.add_option("-s", "--systematics", dest = "systematics",
-                      default='False',
+                      default=False,
                       help='Systematics')
     parser.add_option("-g", "--grep", dest = "cut_on_sample_names",
                       default="''",
