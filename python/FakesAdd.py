@@ -69,6 +69,8 @@ def get_options():
     
 systs_lists_per_channel = {
     'tt' : ['qcd_syst', 'qcd_dm0_njet0_stat', 'qcd_dm0_njet1_stat', 'w_syst', 'tt_syst', 'w_frac_syst', 'tt_frac_syst'],
+    'mt' : ['qcd_syst', 'qcd_dm0_njet0_stat', 'qcd_dm0_njet1_stat', 'w_syst', 'w_dm0_njet0_stat', 'w_dm0_njet1_stat', 'tt_syst', 'tt_dm0_njet0_stat', 'tt_dm0_njet1_stat'],
+    'et' : ['qcd_syst', 'qcd_dm0_njet0_stat', 'qcd_dm0_njet1_stat', 'w_syst', 'w_dm0_njet0_stat', 'w_dm0_njet1_stat', 'tt_syst', 'tt_dm0_njet0_stat', 'tt_dm0_njet1_stat']
 }
 
 def FakesAdd(oldfile, newfile, systematics=False, channel='tt'):
