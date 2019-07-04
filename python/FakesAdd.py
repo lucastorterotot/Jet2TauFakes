@@ -67,6 +67,10 @@ def get_options():
     (options,args) = parser.parse_args()
     return options, args
     
+systs_lists_per_channel = {
+    'tt' : ['ff_qcd_syst', 'qcd_dm0_njet0_stat', 'qcd_dm0_njet1_stat', 'w_syst', 'tt_syst', 'w_frac', 'tt_frac'],
+}
+
 def FakesAdd(oldfile, newfile, systematics=False, channel='tt'):
     inclfile = ROOT.TFile(FF_file.format(channel))
     inclff = inclfile.Get('ff_comb')
@@ -85,27 +89,28 @@ def FakesAdd(oldfile, newfile, systematics=False, channel='tt'):
     l2_fakeweight = array('d',[1.])
     l2_fakesbranch = tree.Branch('l2_fakeweight',l2_fakeweight,'l2_fakeweight/D')
     if systematics:
-        if channel == 'tt':
-            l1_fakeweight_up = array('d',[1.])
-            l1_fakesbranch_up = tree.Branch('l1_fakeweight_up',l1_fakeweight_up,'l1_fakeweight_up/D')
-        l2_fakeweight_up = array('d',[1.])
-        l2_fakesbranch_up = tree.Branch('l2_fakeweight_up',l2_fakeweight_up,'l2_fakeweight_up/D')
-        if channel == 'tt':
-            l1_fakeweight_down = array('d',[1.])
-            l1_fakesbranch_down = tree.Branch('l1_fakeweight_down',l1_fakeweight_down,'l1_fakeweight_down/D')
-        l2_fakeweight_down = array('d',[1.])
-        l2_fakesbranch_down = tree.Branch('l2_fakeweight_down',l2_fakeweight_down,'l2_fakeweight_down/D')
+        l1_fakeweights = {}
+        l2_fakeweights = {}
+        l1_fakesbranchs = {} # To keep in memory
+        l2_fakesbranchs = {} # To keep in memory
+        for syst in systs_lists_per_channel[channel]:
+            for up_or_down in ['up', 'down']:
+                systkey = '{}_{}'.format(syst, up_or_down)
+                if channel == 'tt':
+                    l1_fakeweights[systkey] = array('d',[1.])
+                    l1_fakesbranchs[systkey] = tree.Branch('l1_fakeweight_{}'.format(systkey),l1_fakeweights[systkey],'l1_fakeweight_{}/D'.format(systkey))
+                l2_fakeweights[systkey] = array('d',[1.])
+                l2_fakesbranchs[systkey] = tree.Branch('l2_fakeweight_{}'.format(systkey),l2_fakeweights[systkey],'l2_fakeweight_{}/D'.format(systkey))
     for event in oldtree:
         if channel == 'tt':
             l1_fakeweight[0] = get_event_fake_factor(event, channel=channel, leg=1, ff=inclff, w=w)
         l2_fakeweight[0] = get_event_fake_factor(event, channel=channel, leg=2, ff=inclff, w=w)
         if systematics:
             if channel == 'tt':
-                l1_fakeweight_up[0] = get_event_fake_factor(event, channel=channel, leg=1, sys='up', ff=inclff, w=w)
-            l2_fakeweight_up[0] = get_event_fake_factor(event, channel=channel, leg=2, sys='up', ff=inclff, w=w)
-            if channel == 'tt':
-                l1_fakeweight_down[0] = get_event_fake_factor(event, channel=channel, leg=1, sys='down', ff=inclff, w=w)
-            l2_fakeweight_down[0] = get_event_fake_factor(event, channel=channel, leg=2, sys='down', ff=inclff, w=w)
+                for systkey, fakeweight in l1_fakeweights.iteritems():
+                    fakeweight[0] = get_event_fake_factor(event, channel=channel, leg=1, sys=systkey, ff=inclff, w=w)
+            for systkey, fakeweight in l2_fakeweights.iteritems():
+                fakeweight[0] = get_event_fake_factor(event, channel=channel, leg=2, sys=systkey, ff=inclff, w=w)
         tree.Fill()
     tree.Write()
     #f.Close()
