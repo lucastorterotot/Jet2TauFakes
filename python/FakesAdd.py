@@ -13,7 +13,7 @@ def get_event_fake_factor(event, channel, leg=2, sys='', ff=None, w=None):
     '''
     inputs = get_FF_inputs(event, channel, leg, w)
     if sys:
-        ffval =  ff.value(len(inputs), array('d',inputs),sys)
+        ffval =  ff.value(len(inputs), array('d',inputs),'ff_{}'.format(sys))
     else:
         ffval = ff.value(len(inputs), array('d',inputs))
     return ffval
@@ -68,7 +68,7 @@ def get_options():
     return options, args
     
 systs_lists_per_channel = {
-    'tt' : ['ff_qcd_syst', 'qcd_dm0_njet0_stat', 'qcd_dm0_njet1_stat', 'w_syst', 'tt_syst', 'w_frac', 'tt_frac'],
+    'tt' : ['qcd_syst', 'qcd_dm0_njet0_stat', 'qcd_dm0_njet1_stat', 'w_syst', 'tt_syst', 'w_frac', 'tt_frac'],
 }
 
 def FakesAdd(oldfile, newfile, systematics=False, channel='tt'):
