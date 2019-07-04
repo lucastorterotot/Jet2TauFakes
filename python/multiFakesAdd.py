@@ -1,5 +1,6 @@
 from FakesAdd import FakesAdd
 import os
+import glob
 from functools import partial
 import multiprocessing as mp
 
@@ -39,23 +40,16 @@ def multithreadmap(f,X,ncores=20, **kwargs):
     return(Xout)
 
 options, args = get_options()
-os.system('ls {} | grep {} > files.out'.format(options.source_dir, options.cut_on_sample_names))
-
-# Select trees
-files_to_process = []
-with open('files.out') as f:
-    for l in f.readlines():
-        command = 'find '+options.source_dir+'/'+l[:-1]+'/'+' -type f -name tree.root'
-        files_to_add = os.popen(command).read()[:-1].split('\n')
-        files_to_process += files_to_add
-os.system('rm files.out')
+subd = [f for f in glob.glob(options.source_dir+'/*') if 'HiggsSUSY' not in f]
+files_to_process = ['{}/NtupleProducer/tree.root'.format(f) for f in subd if not os.path.isfile('{}//NtupleProducer/tree_fakes.root'.format(f))]
+files_to_process = [f for f in files_to_process if options.cut_on_sample_names in f]
 
 print ''
 for tree in files_to_process:
     print tree
 start_add_FF = None
 while start_add_FF not in ['y','n']:
-    start_add_FF = raw_input('Add FF to this trees? [y/n]')
+    start_add_FF = raw_input('Add FF to these trees? [y/n]')
 if start_add_FF == 'y':
     print 'Starting to add fake factors.'
     multithreadmap(FakesAdd, files_to_process, ncores=options.ncores, systematics=options.systematics, channel=options.channel)
