@@ -2,6 +2,9 @@ import ROOT
 import os
 from array import array
 
+FF_file = '$CMSSW_BASE/src/HTTutilities/Jet2TauFakes/data/SM2017/tight/vloose/{}/fakeFactors.root'
+frac_file = "/home/cms/torterotot/public/htt_ff_fractions_2017.root"
+
 def get_event_fake_factor(event, channel, leg=2, sys='', ff=None, w=None):
     '''Interface function to retrieve the fake factors from
     the rootfile for the given channel.
@@ -64,17 +67,17 @@ def get_options():
     (options,args) = parser.parse_args()
     return options, args
     
-def FakesAdd(oldfilename, systematics=False, channel='tt'):
-    inclfile = ROOT.TFile('$CMSSW_BASE/src/HTTutilities/Jet2TauFakes/data/SM2017/tight/vloose/'+channel+'/fakeFactors.root')
+def FakesAdd(oldfile, newfile, systematics=False, channel='tt'):
+    inclfile = ROOT.TFile(FF_file.format(channel))
     inclff = inclfile.Get('ff_comb')
 
-    f = ROOT.TFile("/home/cms/torterotot/public/htt_ff_fractions_2017.root")
+    f = ROOT.TFile(frac_file)
     w = f.Get("w")
     f.Close()
     
-    oldfile = ROOT.TFile(oldfilename)
     oldtree = oldfile.Get('events')
-    f = ROOT.TFile(oldfilename.replace('.root','_fakes.root'),'recreate')
+    # f = ROOT.TFile(oldfilename.replace('.root','_fakes.root'),'recreate')
+    newfile.cd() #TODO test
     tree = oldtree.CloneTree(0)
     if channel == 'tt':
         l1_fakeweight = array('d',[1.])
@@ -105,7 +108,7 @@ def FakesAdd(oldfilename, systematics=False, channel='tt'):
             l2_fakeweight_down[0] = get_event_fake_factor(event, channel=channel, leg=2, sys='down', ff=inclff, w=w)
         tree.Fill()
     tree.Write()
-    f.Close()
+    #f.Close()
 
 
 if __name__ == '__main__':
