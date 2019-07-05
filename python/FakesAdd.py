@@ -113,6 +113,9 @@ def FakesAdd(oldfile, newfile, systematics=False, channel='tt'):
                 fakeweight[0] = get_event_fake_factor(event, channel=channel, leg=2, sys=systkey, ff=inclff, w=w)
         tree.Fill()
     tree.Write()
+    inclff.Delete()
+    inclfile.Close()
+    w.Delete()
     #f.Close()
 
 
