@@ -115,6 +115,9 @@ def FakesAdd(oldfile, newfile, systematics=False, channel='tt'):
                 fakeweight[0] = get_event_fake_factor(event, channel=channel, leg=2, sys=systkey, ff=inclff, w=w)
         tree.Fill()
     tree.Write()
+    inclff.Delete()
+    inclfile.Close()
+    w.Delete()
     #f.Close()
 
 
@@ -122,4 +125,6 @@ if __name__ == '__main__':
 
     options, args = get_options()
     src = args[0]
-    FakesAdd(src, systematics=options.systematics, channel=options.channel)
+    src = ROOT.TFile(src)
+    outfile = ROOT.TFile('faked_tree.root','recreate')
+    FakesAdd(src, outfile, systematics=options.systematics, channel=options.channel)
